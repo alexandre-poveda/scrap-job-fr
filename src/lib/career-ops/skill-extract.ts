@@ -129,6 +129,27 @@ export const CANONICAL_SKILLS: Record<string, string> = {
   'ux/ui': 'UX/UI Design',
   'figma': 'Figma',
 
+  // Communication, Marketing & Médias FR
+  'communication digitale': 'Communication digitale',
+  'communication interne': 'Communication interne',
+  'communication externe': 'Communication externe',
+  'communication': 'Stratégie de communication',
+  'reseaux sociaux': 'Réseaux sociaux / Community Management',
+  'social media': 'Social Media',
+  'relations presse': 'Relations presse & médias',
+  'evenementiel': 'Événementiel & Organisation',
+  'redaction': 'Rédaction de contenus',
+  'redaction web': 'Rédaction web & SEO',
+  'canva': 'Canva',
+  'photoshop': 'Adobe Photoshop',
+  'illustrator': 'Adobe Illustrator',
+  'indesign': 'Adobe InDesign',
+  'suite adobe': 'Suite Adobe Creative',
+  'pack office': 'Pack Office',
+  'wordpress': 'WordPress',
+  'newsletter': 'Emailing & Newsletters',
+  'strategie de communication': 'Stratégie de communication',
+
   // Tertiaire / Administratif / Métiers FR
   'comptabilite': 'Comptabilité',
   'gestion financiere': 'Gestion financière',

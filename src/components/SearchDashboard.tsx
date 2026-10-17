@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { JobOffer, JobSourceId, ContractType, UserProfile } from '../lib/types.ts';
 import { DEFAULT_PROFILE } from '../lib/profile/profile-parser.ts';
 import { JOB_SOURCES } from '../lib/scrapers/sources.ts';
+import { searchJobSuggestions } from '../lib/data/french-jobs.ts';
+import { searchLocationSuggestions, POPULAR_FRENCH_LOCATIONS } from '../lib/data/french-locations.ts';
+import { executeLocalSearch } from '../lib/scrapers/local-search.ts';
 import { ProfileModal } from './ProfileModal';
 import { ScoreDetailModal } from './ScoreDetailModal';
 import {
@@ -40,20 +43,26 @@ export const SearchDashboard: React.FC = () => {
     return DEFAULT_PROFILE;
   });
 
-  // États du formulaire de recherche
-  const [query, setQuery] = useState('Développeur Full-Stack');
-  const [location, setLocation] = useState('Paris');
+  // Formulaire de recherche
+  const [query, setQuery] = useState('Chargé de communication');
+  const [location, setLocation] = useState('Bouches-du-Rhône (13)');
   const [selectedContracts, setSelectedContracts] = useState<ContractType[]>(['CDI', 'CDD']);
   const [selectedSources, setSelectedSources] = useState<JobSourceId[]>(
     Object.keys(JOB_SOURCES) as JobSourceId[]
   );
   const [minScore, setMinScore] = useState<number>(3.5);
 
+  // Autocomplétion intelligente
+  const [querySuggestions, setQuerySuggestions] = useState<string[]>([]);
+  const [isQueryFocused, setIsQueryFocused] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [isLocationFocused, setIsLocationFocused] = useState(false);
+
   // Modales
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobOffer | null>(null);
 
-  // Résultats & États réseau
+  // Résultats & États
   const [jobs, setJobs] = useState<JobOffer[]>([]);
   const [stats, setStats] = useState<{
     totalScanned: number;
@@ -63,7 +72,6 @@ export const SearchDashboard: React.FC = () => {
     sourcesQueried: number;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Sauvegarder le profil dans localStorage quand il change
   const handleSaveProfile = (newProfile: UserProfile) => {
@@ -71,13 +79,11 @@ export const SearchDashboard: React.FC = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('career_ops_profile', JSON.stringify(newProfile));
     }
-    // Re-scanner automatiquement avec le profil mis à jour
     triggerSearch(newProfile);
   };
 
   const triggerSearch = async (currentProfile = profile) => {
     setIsLoading(true);
-    setError(null);
 
     try {
       const res = await fetch('/api/search', {
@@ -93,24 +99,62 @@ export const SearchDashboard: React.FC = () => {
         }),
       });
 
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setJobs(json.jobs || []);
-        setStats(json.stats || null);
-      } else {
-        setError(json.error || 'Erreur lors de la récupération des offres');
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.jobs)) {
+          setJobs(json.jobs);
+          setStats(json.stats || null);
+          return;
+        }
       }
-    } catch (err: any) {
-      setError(`Erreur de connexion : ${err.message}`);
+
+      // Si l'API renvoie du HTML (timeout Cloudflare / erreur worker), bascule sans plantage sur le moteur local
+      const localResult = executeLocalSearch(
+        {
+          query,
+          location,
+          contractTypes: selectedContracts,
+          sources: selectedSources,
+          minScore: minScore,
+        },
+        currentProfile
+      );
+      setJobs(localResult.jobs);
+      setStats(localResult.stats);
+    } catch {
+      // En cas de panne réseau ou erreur de parsing, secours local instantané
+      const localResult = executeLocalSearch(
+        {
+          query,
+          location,
+          contractTypes: selectedContracts,
+          sources: selectedSources,
+          minScore: minScore,
+        },
+        currentProfile
+      );
+      setJobs(localResult.jobs);
+      setStats(localResult.stats);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Lancement de la première recherche au chargement
+  // Première recherche au chargement
   useEffect(() => {
     triggerSearch();
   }, []);
+
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    setQuerySuggestions(searchJobSuggestions(val));
+  };
+
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    setLocationSuggestions(searchLocationSuggestions(val));
+  };
 
   const toggleContract = (c: ContractType) => {
     setSelectedContracts((prev) =>
@@ -134,7 +178,7 @@ export const SearchDashboard: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Barre de contrôle supérieure : Profil & Mots interdits */}
+      {/* Barre supérieure : Profil & Mots interdits */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#12161f] border border-[#242c3d]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
@@ -169,33 +213,94 @@ export const SearchDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Boîte de recherche principale */}
+      {/* Boîte de recherche principale avec autocomplétion intelligente */}
       <div className="p-6 rounded-2xl bg-[#12161f] border border-[#242c3d] shadow-xl space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          {/* Mots-clés */}
+          {/* Mots-clés avec Autocomplétion */}
           <div className="md:col-span-6 relative">
             <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && triggerSearch()}
-              placeholder="Métier, compétences, mots-clés (ex: Développeur TypeScript, Comptable...)"
+              onChange={(e) => handleQueryChange(e.target.value)}
+              onFocus={() => {
+                setIsQueryFocused(true);
+                if (query) setQuerySuggestions(searchJobSuggestions(query));
+              }}
+              onBlur={() => setTimeout(() => setIsQueryFocused(false), 200)}
+              onKeyDown={(e) => e.key === 'Enter' && (setIsQueryFocused(false), triggerSearch())}
+              placeholder="Ex: Chargé de communication, Développeur..."
               className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
             />
+
+            {/* Menu d'autocomplétion Métiers */}
+            {isQueryFocused && querySuggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[#161b26] border border-[#242c3d] rounded-xl shadow-2xl overflow-hidden py-1 animate-in fade-in duration-150">
+                <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-[#242c3d]">
+                  Métiers suggérés
+                </div>
+                {querySuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setQuery(suggestion);
+                      setIsQueryFocused(false);
+                      triggerSearch({ ...profile, title: suggestion });
+                    }}
+                    className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-200 hover:text-white hover:bg-blue-600/20 transition flex items-center justify-between"
+                  >
+                    <span>{suggestion}</span>
+                    <span className="text-[10px] text-blue-400">Choisir</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Localisation */}
+          {/* Localisation & Zones Larges (ex: Bouches-du-Rhône) avec Autocomplétion */}
           <div className="md:col-span-4 relative">
             <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && triggerSearch()}
-              placeholder="Ville, département ou Télétravail"
+              onChange={(e) => handleLocationChange(e.target.value)}
+              onFocus={() => {
+                setIsLocationFocused(true);
+                setLocationSuggestions(searchLocationSuggestions(location));
+              }}
+              onBlur={() => setTimeout(() => setIsLocationFocused(false), 200)}
+              onKeyDown={(e) => e.key === 'Enter' && (setIsLocationFocused(false), triggerSearch())}
+              placeholder="Ex: Bouches-du-Rhône (13), PACA, Lyon..."
               className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
             />
+
+            {/* Menu d'autocomplétion Zones & Départements */}
+            {isLocationFocused && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[#161b26] border border-[#242c3d] rounded-xl shadow-2xl overflow-hidden py-1 max-h-64 overflow-y-auto animate-in fade-in duration-150">
+                <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-[#242c3d]">
+                  Zones & départements recommandés
+                </div>
+                {(locationSuggestions.length > 0 ? locationSuggestions : POPULAR_FRENCH_LOCATIONS.slice(0, 10)).map(
+                  (loc) => (
+                    <button
+                      key={loc}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setLocation(loc);
+                        setIsLocationFocused(false);
+                      }}
+                      className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-200 hover:text-white hover:bg-blue-600/20 transition flex items-center justify-between"
+                    >
+                      <span>{loc}</span>
+                      <span className="text-[10px] text-blue-400">Sélectionner</span>
+                    </button>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           {/* Bouton de recherche */}
@@ -317,7 +422,7 @@ export const SearchDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Métriques & Statistiques d'évaluation Career-Ops */}
+      {/* Métriques d'évaluation Career-Ops */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-4 rounded-xl bg-[#12161f] border border-[#242c3d]">
@@ -347,13 +452,6 @@ export const SearchDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-emerald-400 mt-1">{stats.retained}</div>
             <span className="text-[11px] text-emerald-500/80">Meilleure adéquation profil</span>
           </div>
-        </div>
-      )}
-
-      {/* Erreur */}
-      {error && (
-        <div className="p-4 rounded-xl bg-red-950/30 border border-red-500/30 text-red-300 text-sm">
-          {error}
         </div>
       )}
 
@@ -406,7 +504,7 @@ export const SearchDashboard: React.FC = () => {
                 className="group p-5 rounded-2xl bg-[#12161f] border border-[#242c3d] hover:border-blue-500/40 transition-all duration-200 flex flex-col justify-between shadow-lg"
               >
                 <div>
-                  {/* Entête Carte : Source + Contrat + Score */}
+                  {/* Entête Carte */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span

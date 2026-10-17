@@ -1,5 +1,5 @@
 /**
- * base.ts — Utilitaires de scraping HTTP avec headers réalistes
+ * base.ts — Utilitaires de scraping HTTP avec headers réalistes et timeouts sécurisés
  */
 
 import type { JobOffer, JobSourceId, ContractType } from '../types.ts';
@@ -7,7 +7,7 @@ import { extractSkills } from '../career-ops/skill-extract.ts';
 
 export const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
-export async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 7000): Promise<Response> {
+export async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 3000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -17,13 +17,15 @@ export async function fetchWithTimeout(url: string, options: RequestInit = {}, t
       signal: controller.signal,
       headers: {
         'User-Agent': USER_AGENT,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Cache-Control': 'no-cache',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
         ...(options.headers || {}),
       },
     });
     return response;
+  } catch (err) {
+    // En cas de timeout ou blocage Cloudflare/CORS, renvoyer un statut 504 simulé sans planter
+    return new Response(null, { status: 504, statusText: 'Gateway Timeout' });
   } finally {
     clearTimeout(id);
   }
