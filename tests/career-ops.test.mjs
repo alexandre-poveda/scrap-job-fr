@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { extractSkills, foldFrenchAccents } from '../src/lib/career-ops/skill-extract.ts';
 import { checkBlacklist } from '../src/lib/career-ops/blacklist-filter.ts';
 import { evaluateJobOffer, rankAndFilterJobOffers } from '../src/lib/career-ops/scoring-engine.ts';
-import { parseProfileFromText } from '../src/lib/profile/profile-parser.ts';
+import { parseProfileFromText, isValidPersonName, extractNameFromLinkedInUrl } from '../src/lib/profile/profile-parser.ts';
 
 test('foldFrenchAccents normalizes accents correctly', () => {
   assert.strictEqual(foldFrenchAccents('Développeur Agilité Spécialisé'), 'developpeur agilite specialise');
@@ -162,5 +162,47 @@ Communication digitale • Réseaux sociaux • Canva • Suite Adobe Creative �
   assert.ok(parsed.skills?.includes('Communication digitale'));
   assert.ok(parsed.skills?.includes('Réseaux sociaux / Community Management'));
   assert.ok(parsed.skills?.includes('Canva'));
+});
+
+test('isValidPersonName properly validates person names and rejects section keywords', () => {
+  assert.strictEqual(isValidPersonName('Formation'), false);
+  assert.strictEqual(isValidPersonName('Expérience'), false);
+  assert.strictEqual(isValidPersonName('Compétences'), false);
+  assert.strictEqual(isValidPersonName('https://linkedin.com'), false);
+  assert.strictEqual(isValidPersonName('alexandre@email.com'), false);
+  assert.strictEqual(isValidPersonName('Alexandre Poveda'), true);
+  assert.strictEqual(isValidPersonName('Jean-Paul Sartre'), true);
+});
+
+test('extractNameFromLinkedInUrl extracts readable name from profile url slug', () => {
+  assert.strictEqual(
+    extractNameFromLinkedInUrl('https://www.linkedin.com/in/alexandre-poveda-905308264'),
+    'Alexandre Poveda'
+  );
+  assert.strictEqual(
+    extractNameFromLinkedInUrl('www.linkedin.com/in/marie-curie'),
+    'Marie Curie'
+  );
+  assert.strictEqual(extractNameFromLinkedInUrl('invalid-url'), null);
+});
+
+test('parseProfileFromText does NOT set candidate name to Formation when text starts with Formation', () => {
+  const textStartingWithFormation = `
+Formation
+Université d'Aix-Marseille
+Master Communication
+2020 - 2022
+
+Contact
+alexandre@email.com
+linkedin.com/in/alexandre-poveda-905308264
+`;
+
+  const parsed = parseProfileFromText(textStartingWithFormation, 'linkedin');
+
+  assert.notStrictEqual(parsed.name, 'Formation');
+  assert.strictEqual(parsed.name, 'Alexandre Poveda');
+  assert.strictEqual(parsed.schoolName, "Université d'Aix-Marseille");
+  assert.strictEqual(parsed.degreeTitle, 'Master Communication');
 });
 

@@ -166,11 +166,16 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
 
   const minScore = params.minScore !== undefined ? params.minScore : profile.minimumScoreThreshold;
 
+  const effectiveProfile: UserProfile = {
+    ...profile,
+    title: profile.title || query,
+    skills: candidateSkills,
+    preferredLocations: profile.preferredLocations.length > 0 ? profile.preferredLocations : [location],
+    minimumScoreThreshold: minScore,
+  };
+
   const evaluatedAll = generatedOffers.map((job) => {
-    const breakdown = evaluateJobOffer(job, {
-      ...profile,
-      minimumScoreThreshold: minScore,
-    });
+    const breakdown = evaluateJobOffer(job, effectiveProfile);
 
     if (breakdown.blacklistedFound.length > 0 || breakdown.isExcluded && breakdown.score === 1.0) {
       blacklistedCount++;

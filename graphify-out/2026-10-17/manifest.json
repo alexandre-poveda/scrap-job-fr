@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "src/components/SearchDashboard.tsx": {
-    "mtime": 1792259202.6883538,
-    "seen": 1792259343.1890488,
-    "ast_hash": "e78db72496757db509292b735253f150",
+    "mtime": 1792263370.1299038,
+    "seen": 1792263412.7271912,
+    "ast_hash": "138240eb1d72911e19a106837ae660e4",
     "semantic_hash": ""
   },
   "src/layouts/Layout.astro": {

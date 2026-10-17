@@ -8,26 +8,15 @@ import type { UserProfile } from '../types.ts';
 import { extractText } from 'unpdf';
 
 export const DEFAULT_PROFILE: UserProfile = {
-  name: 'Alexandre Dupont',
-  email: 'alexandre.dupont@email.fr',
-  phone: '06 12 34 56 78',
-  city: 'Marseille (13)',
-  title: 'Chargé de communication',
-  summary: 'Professionnel de la communication et du marketing digital. Recherche activement un CDI, CDD ou mission dans un environnement stimulant.',
-  skills: [
-    'Communication digitale',
-    'Stratégie de communication',
-    'Réseaux sociaux / Community Management',
-    'Relations presse & médias',
-    'Événementiel & Organisation',
-    'Canva',
-    'Suite Adobe Creative',
-    'Pack Office',
-    'Rédaction web & SEO',
-    'Gestion de projet',
-  ],
-  experienceYears: 3,
-  preferredLocations: ['Bouches-du-Rhône (13)', 'PACA', 'Marseille (13)', 'Télétravail'],
+  name: '',
+  email: '',
+  phone: '',
+  city: '',
+  title: '',
+  summary: '',
+  skills: [],
+  experienceYears: 0,
+  preferredLocations: [],
   preferredContracts: ['CDI', 'CDD'],
   blacklistedKeywords: [
     'alternance',
@@ -44,40 +33,84 @@ export const DEFAULT_PROFILE: UserProfile = {
     'benevolat',
   ],
   minimumScoreThreshold: 3.5,
-  cvFileName: 'CV_Alexandre_Dupont_Communication.pdf',
+  cvFileName: undefined,
   defaultCoverLetter: `Madame, Monsieur,\n\nVivement intéressé(e) par votre opportunité de {poste} au sein de {entreprise}, je vous adresse ma candidature avec un réel enthousiasme.\n\nFort(e) de mes compétences en {competences_cles}, j'ai développé une solide expertise dans le déploiement de stratégies de communication percutantes et la valorisation de marque. La vision et les ambitions de {entreprise} à {ville} correspondent parfaitement à mon projet professionnel.\n\nRigoureux(se), autonome et force de proposition, je serais ravi(e) de vous exposer mes motivations lors d'un prochain échange.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\n{nom}`,
   defaultPitch: `Bonjour, je vous soumets ma candidature pour le poste de {poste} chez {entreprise}. Maîtrisant {competences_cles}, je suis disponible pour échanger sur vos objectifs et vous apporter mon savoir-faire à {ville}. Au plaisir d'un échange ! {nom} • {telephone}`,
   
   // Champs questionnaires formulaires recruteurs
-  schoolName: 'Université d\'Aix-Marseille',
-  degreeTitle: 'Master Information, Communication & Médias Numériques',
+  schoolName: '',
+  degreeTitle: '',
   availability: 'Disponible immédiatement',
   onSiteCompatibility: 'Oui, mes conditions personnelles sont 100% compatibles avec une présence sur site.',
   alternanceRhythm: '0 (Non concerné) — Candidature pour un contrat à temps plein classique, sans alternance.',
   hasSocialMediaExperience: true,
-  socialMediaDetails: 'Oui. Création régulière de contenus éditoriaux, visuels et vidéos (Reels, TikTok, LinkedIn, Instagram, Facebook). Conception sur Canva / Photoshop / Illustrator et montage Premiere Pro / CapCut.',
-  portfolioUrl: 'https://mon-portfolio-communication.fr',
-  linkedinUrl: 'https://www.linkedin.com/in/alexandre-dupont',
-  githubOrProjectsUrl: 'https://drive.google.com/drive/folders/mes-realisations-com',
+  socialMediaDetails: '',
+  portfolioUrl: '',
+  linkedinUrl: '',
+  githubOrProjectsUrl: '',
   digitalCommMotivation: 'Ce qui me donne envie de participer à la communication digitale de {entreprise}, c\'est l\'opportunité de valoriser vos projets, vos expertises et vos engagements grâce à des formats de contenus dynamiques, créatifs et engageants pour vos communautés.',
-  
-  customFiles: [
-    {
-      id: 'file-cv-1',
-      name: 'CV_Alexandre_Dupont_Communication.pdf',
-      type: 'cv',
-      size: '142 Ko',
-      dateAdded: '17 Octobre 2026',
-    },
-    {
-      id: 'file-lettre-1',
-      name: 'Lettre_Motivation_Type_2026.pdf',
-      type: 'cover_letter',
-      size: '98 Ko',
-      dateAdded: '17 Octobre 2026',
-    },
-  ],
+  customFiles: [],
 };
+
+// Termes qui ne doivent JAMAIS être considérés comme un nom de candidat
+export const FORBIDDEN_NAME_WORDS = [
+  'formation', 'formations', 'education', 'éducation', 'etudes', 'études',
+  'experience', 'expérience', 'experiences', 'expériences',
+  'competence', 'competences', 'compétence', 'compétences', 'skills',
+  'profil', 'profile', 'resume', 'résumé', 'cv', 'curriculum', 'vitae',
+  'contact', 'coordonnees', 'coordonnées', 'informations', 'infos',
+  'langue', 'langues', 'certification', 'certifications', 'projets', 'projet',
+  'centre', 'centres', 'interet', 'intérêt', 'interets', 'intérêts',
+  'benevolat', 'bénévolat', 'recommandation', 'recommandations',
+  'universite', 'université', 'ecole', 'école', 'school', 'diplome', 'diplôme',
+  'licence', 'master', 'bachelor', 'doctorat', 'bts', 'dut',
+  'linkedin', 'http', 'https', 'www', 'page', 'email', 'tel', 'telephone',
+];
+
+/**
+ * Valide si une chaîne peut être un nom de personne plausible (et non un en-tête de section comme "Formation").
+ */
+export function isValidPersonName(candidate?: string): boolean {
+  if (!candidate) return false;
+  const trimmed = candidate.trim();
+  if (trimmed.length < 2 || trimmed.length > 50) return false;
+  
+  const lower = trimmed.toLowerCase();
+  if (FORBIDDEN_NAME_WORDS.some((w) => lower === w || lower.startsWith(`${w} `) || lower.endsWith(` ${w}`))) {
+    return false;
+  }
+  // Ne doit pas contenir de chiffres, emails ou URL
+  if (/\d/.test(trimmed) || trimmed.includes('@') || trimmed.includes('/') || trimmed.includes('.com') || trimmed.includes('www.')) {
+    return false;
+  }
+  // Ne doit pas ressembler à une phrase ou une description
+  if (trimmed.includes(':') || trimmed.includes(';') || trimmed.split(/\s+/).length > 5) {
+    return false;
+  }
+  // Doit contenir des lettres
+  return /[a-zA-ZÀ-ÿ]/.test(trimmed);
+}
+
+/**
+ * Déduit le prénom et nom depuis le slug d'une URL LinkedIn
+ * Ex: "https://www.linkedin.com/in/alexandre-poveda-905308264" -> "Alexandre Poveda"
+ */
+export function extractNameFromLinkedInUrl(url?: string): string | null {
+  if (!url) return null;
+  const match = url.match(/linkedin\.com\/in\/([a-zA-Z0-9_\-\%]+)/i);
+  if (!match || !match[1]) return null;
+  
+  let slug = decodeURIComponent(match[1]);
+  // Nettoyer les hash / identifiants numériques de fin (ex: -905308264 ou -a1b2c3d4)
+  slug = slug.replace(/[-_]\d{4,}[a-z0-9]*$/i, '');
+  slug = slug.replace(/[-_][0-9a-f]{6,}$/i, '');
+  
+  const parts = slug.split(/[-_]+/).filter(Boolean);
+  if (parts.length >= 2 && parts.every((p) => !FORBIDDEN_NAME_WORDS.includes(p.toLowerCase()))) {
+    return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+  }
+  return null;
+}
 
 /**
  * Extrait les informations d'un profil LinkedIn (depuis export PDF ou copier-coller texte).
@@ -159,16 +192,37 @@ export function extractLinkedInData(text: string): Partial<UserProfile> {
     }
   }
 
-  // 4. Détection du Titre et du Nom
-  if (lines.length > 0) {
-    if (lines[0].length < 40 && !lines[0].toLowerCase().includes('linkedin') && !lines[0].toLowerCase().includes('contact')) {
-      result.name = lines[0];
+  // 4. Détection du Nom (évite impérativement "Formation", "Expérience", etc.)
+  for (let i = 0; i < Math.min(lines.length, 8); i++) {
+    const candidate = lines[i];
+    if (isValidPersonName(candidate)) {
+      result.name = candidate;
+      break;
     }
-    for (let i = 1; i < Math.min(lines.length, 6); i++) {
-      if (lines[i].length < 80 && !lines[i].includes('@') && !lines[i].includes('linkedin') && !lines[i].includes('http')) {
-        result.title = lines[i];
-        break;
-      }
+  }
+
+  // Si aucun nom valide trouvé dans les premières lignes, déduire depuis l'URL LinkedIn
+  if (!result.name && result.linkedinUrl) {
+    const nameFromSlug = extractNameFromLinkedInUrl(result.linkedinUrl);
+    if (nameFromSlug) {
+      result.name = nameFromSlug;
+    }
+  }
+
+  // Détection du Titre de poste
+  for (let i = 0; i < Math.min(lines.length, 8); i++) {
+    const line = lines[i];
+    const lower = line.toLowerCase();
+    if (
+      line !== result.name &&
+      line.length > 3 &&
+      line.length < 80 &&
+      !line.includes('@') &&
+      !line.includes('http') &&
+      !FORBIDDEN_NAME_WORDS.includes(lower)
+    ) {
+      result.title = line;
+      break;
     }
   }
 
@@ -221,23 +275,32 @@ export function parseProfileFromText(rawText: string, sourceHint: 'cv' | 'linked
   let inferredTitle = linkedInData.title || '';
   let inferredName = linkedInData.name || '';
 
-  if (lines.length > 0 && !inferredName) {
-    if (lines[0].length < 40 && !lines[0].toLowerCase().includes('cv') && !lines[0].toLowerCase().includes('curriculum')) {
-      inferredName = lines[0];
+  if (!inferredName) {
+    for (let i = 0; i < Math.min(lines.length, 6); i++) {
+      if (isValidPersonName(lines[i])) {
+        inferredName = lines[i];
+        break;
+      }
     }
   }
 
+  if (!inferredName && linkedInData.linkedinUrl) {
+    inferredName = extractNameFromLinkedInUrl(linkedInData.linkedinUrl) || '';
+  }
+
   if (!inferredTitle) {
-    for (let i = 1; i < Math.min(lines.length, 6); i++) {
-      if (lines[i].length < 60 && !lines[i].includes('@') && !lines[i].includes('http')) {
-        inferredTitle = lines[i];
+    for (let i = 0; i < Math.min(lines.length, 6); i++) {
+      const line = lines[i];
+      const lower = line.toLowerCase();
+      if (line !== inferredName && line.length < 60 && !line.includes('@') && !line.includes('http') && !FORBIDDEN_NAME_WORDS.includes(lower)) {
+        inferredTitle = line;
         break;
       }
     }
   }
 
   // Détection des années d'expérience (ex: "5 ans d'expérience", "3 ans d'exp")
-  let experienceYears = 3;
+  let experienceYears = 0;
   const expMatch = rawText.match(/(\d+)\s*(?:ans|années)\s*(?:d'expérience|d'exp)/i);
   if (expMatch && expMatch[1]) {
     experienceYears = parseInt(expMatch[1], 10);

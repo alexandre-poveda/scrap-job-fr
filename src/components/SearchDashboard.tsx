@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { JobOffer, JobSourceId, ContractType, UserProfile, JobApplication } from '../lib/types.ts';
-import { DEFAULT_PROFILE } from '../lib/profile/profile-parser.ts';
+import { DEFAULT_PROFILE, isValidPersonName, extractNameFromLinkedInUrl } from '../lib/profile/profile-parser.ts';
 import { JOB_SOURCES } from '../lib/scrapers/sources.ts';
 import { searchJobSuggestions } from '../lib/data/french-jobs.ts';
 import { searchLocationSuggestions, POPULAR_FRENCH_LOCATIONS } from '../lib/data/french-locations.ts';
@@ -38,7 +38,7 @@ const CONTRACT_TYPES: { id: ContractType; label: string }[] = [
   { id: 'CDI', label: 'CDI' },
   { id: 'CDD', label: 'CDD' },
   { id: 'Interim', label: 'Intérim' },
-  { id: 'FonctionPublique', label: 'Fonction Publique' },
+  { id: 'FonctionPublique', label: 'Fonction Publique (Mairie, Collectivités)' },
 ];
 
 export const SearchDashboard: React.FC = () => {
@@ -51,7 +51,15 @@ export const SearchDashboard: React.FC = () => {
       const saved = localStorage.getItem('career_ops_profile');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          if (parsed) {
+            // Auto-heal si l'utilisateur avait enregistré "Formation" ou un en-tête comme nom
+            if (!isValidPersonName(parsed.name) || parsed.name.toLowerCase() === 'formation') {
+              const nameFromSlug = extractNameFromLinkedInUrl(parsed.linkedinUrl);
+              parsed.name = nameFromSlug || '';
+            }
+          }
+          return { ...DEFAULT_PROFILE, ...parsed };
         } catch {
           // ignore
         }
@@ -379,17 +387,19 @@ export const SearchDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#12161f] border border-[#242c3d]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
-                {profile.name.charAt(0)}
+                {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="w-5 h-5 text-blue-400" />}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-white">{profile.name}</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {profile.name || 'Mon Profil Candidat'}
+                  </h3>
                   <span className="px-2 py-0.5 text-[10px] rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
                     {profile.skills.length} compétences actives
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  {profile.title || 'Profil candidat'} • Seuil min : <span className="text-blue-400 font-semibold">{profile.minimumScoreThreshold}/5</span>
+                  {profile.title || 'Profil candidat'} {profile.city ? `• ${profile.city}` : ''}
                 </p>
               </div>
             </div>

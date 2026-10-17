@@ -282,7 +282,7 @@
       "file_type": "code",
       "norm_label": "searchdashboard()",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L42"
+      "source_location": "L44"
     },
     {
       "id": "src_lib_career_ops_application_helper_generaterecruiterformanswers",
@@ -816,7 +816,7 @@
       "file_type": "code",
       "norm_label": "contract_types",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L35"
+      "source_location": "L37"
     },
     {
       "id": "src_layouts_layout",
@@ -2190,6 +2190,18 @@
     },
     {
       "source": "src_components_searchdashboard_searchdashboard",
+      "target": "src_components_profiletab_profiletab",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L1023",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard_searchdashboard",
       "target": "src_components_applicationmodal_applicationmodal",
       "relation": "calls",
       "_origin": "ast",
@@ -2197,7 +2209,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1208",
+      "source_location": "L1325",
       "weight": 1.0
     },
     {
@@ -2209,7 +2221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1217",
+      "source_location": "L1334",
       "weight": 1.0
     },
     {
@@ -2221,7 +2233,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1225",
+      "source_location": "L1342",
       "weight": 1.0
     },
     {
@@ -2233,7 +2245,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L187",
+      "source_location": "L221",
       "weight": 1.0
     },
     {
@@ -2245,7 +2257,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L238",
+      "source_location": "L272",
       "weight": 1.0
     },
     {
@@ -2257,19 +2269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L243",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_searchdashboard_searchdashboard",
-      "target": "src_components_profiletab_profiletab",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L930",
+      "source_location": "L277",
       "weight": 1.0
     },
     {
@@ -7182,7 +7182,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -7193,7 +7193,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L42",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -8043,5 +8043,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6bcade1f34d78ca4e4c41b97e90cf5f9d5499862"
+  "built_at_commit": "37b7d8b68f3790785ecffc1303c7e728f5ab75dd"
 }

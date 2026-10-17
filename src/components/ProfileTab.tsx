@@ -33,6 +33,21 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+const SUGGESTED_SKILLS = [
+  'Communication digitale',
+  'Réseaux sociaux',
+  'Création de contenu',
+  'Canva',
+  'Stratégie de communication',
+  'Relations presse',
+  'WordPress',
+  'SEO',
+  'Suite Adobe',
+  'Événementiel',
+  'Rédaction web',
+  'Gestion de projet',
+];
+
 interface ProfileTabProps {
   profile: UserProfile;
   onSaveProfile: (profile: UserProfile) => void;
@@ -389,23 +404,25 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
       <div className="p-6 rounded-2xl bg-[#12161f] border border-[#242c3d] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-500/20">
-            {formData.name.charAt(0) || 'U'}
+            {formData.name ? formData.name.charAt(0).toUpperCase() : <User className="w-6 h-6" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">{formData.name}</h2>
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                {formData.name || 'Mon Profil Candidat'}
+              </h2>
               {formData.linkedinUrl && (
                 <span className="px-2 py-0.5 text-[10px] bg-[#0A66C2]/20 text-sky-300 border border-[#0A66C2]/40 rounded-full font-semibold flex items-center gap-1">
                   <Linkedin className="w-2.5 h-2.5 fill-current" /> LinkedIn
                 </span>
               )}
             </div>
-            <p className="text-xs text-blue-400 font-medium">{formData.title}</p>
+            <p className="text-xs text-blue-400 font-medium">{formData.title || 'Définissez votre poste cible'}</p>
             <p className="text-[11px] text-slate-400 mt-0.5">
               {formData.schoolName ? (
                 <span>🎓 <strong className="text-slate-300">{formData.schoolName}</strong> {formData.degreeTitle ? `(${formData.degreeTitle})` : ''} • </span>
               ) : null}
-              {formData.skills.length} compétences • {formData.customFiles?.length || 1} fichier(s) • Seuil : {formData.minimumScoreThreshold}/5
+              {formData.skills.length} compétences • {formData.customFiles?.length || 0} fichier(s)
             </p>
           </div>
         </div>
@@ -508,6 +525,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Ex: Alexandre Poveda"
                   className="w-full px-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
@@ -531,6 +549,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Ex: alexandre@exemple.fr"
                     className="w-full pl-9 pr-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -544,6 +563,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                     type="tel"
                     value={formData.phone || ''}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="Ex: 06 12 34 56 78"
                     className="w-full pl-9 pr-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -968,21 +988,27 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
             </div>
 
             <div className="flex flex-wrap gap-1.5 max-h-56 overflow-y-auto p-2 bg-slate-900 border border-slate-800 rounded-xl">
-              {formData.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => removeSkill(skill)}
-                    className="hover:text-red-400 text-slate-400 ml-0.5"
+              {formData.skills.length === 0 ? (
+                <div className="w-full py-4 text-center text-xs text-slate-500 italic">
+                  Aucune compétence enregistrée. Importez votre CV ou cliquez sur les suggestions ci-dessous.
+                </div>
+              ) : (
+                formData.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20"
                   >
-                    ×
-                  </button>
-                </span>
-              ))}
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(skill)}
+                      className="hover:text-red-400 text-slate-400 ml-0.5"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -1001,6 +1027,32 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
+            </div>
+
+            {/* Suggestions rapides de compétences */}
+            <div className="pt-2 border-t border-slate-800/80">
+              <span className="text-[11px] text-slate-400 font-medium block mb-1.5">
+                💡 Suggestions rapides (cliquez pour ajouter) :
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {SUGGESTED_SKILLS.filter((s) => !formData.skills.includes(s))
+                  .slice(0, 8)
+                  .map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          skills: [...prev.skills, s],
+                        }))
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-slate-800/90 hover:bg-blue-600/30 text-slate-300 hover:text-blue-300 border border-slate-700/60 transition cursor-pointer"
+                    >
+                      + {s}
+                    </button>
+                  ))}
+              </div>
             </div>
           </div>
 
@@ -1051,15 +1103,17 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
             </div>
           </div>
 
-          {/* Bloc Contrats & Seuil */}
+          {/* Bloc Contrats */}
           <div className="p-6 rounded-2xl bg-[#12161f] border border-[#242c3d] shadow-lg space-y-4">
             <h3 className="text-sm font-bold text-white pb-3 border-b border-[#242c3d]">
-              Contrats & Seuil Minimal
+              Contrats souhaités
             </h3>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2">Contrats souhaités</label>
-              <div className="flex flex-wrap gap-1.5">
+              <p className="text-[11px] text-slate-400 mb-2.5">
+                Sélectionnez les types de contrats qui vous intéressent pour le filtrage et la personnalisation de vos candidatures :
+              </p>
+              <div className="flex flex-wrap gap-2">
                 {(['CDI', 'CDD', 'Interim', 'FonctionPublique'] as ContractType[]).map((c) => {
                   const isSel = formData.preferredContracts.includes(c);
                   return (
@@ -1067,35 +1121,24 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                       key={c}
                       type="button"
                       onClick={() => toggleContract(c)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition cursor-pointer ${
                         isSel
                           ? 'bg-blue-600/20 text-blue-400 border-blue-500'
                           : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
                       }`}
                     >
-                      {c === 'Interim' ? 'Intérim' : c === 'FonctionPublique' ? 'Fonction Publique' : c}
+                      {c === 'Interim'
+                        ? 'Intérim'
+                        : c === 'FonctionPublique'
+                        ? 'Fonction Publique (Mairie, Collectivités)'
+                        : c}
                     </button>
                   );
                 })}
               </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-medium text-slate-400">Seuil de note minimal</label>
-                <span className="text-xs font-bold text-blue-400">{formData.minimumScoreThreshold}/5</span>
-              </div>
-              <input
-                type="range"
-                min="1.0"
-                max="4.5"
-                step="0.5"
-                value={formData.minimumScoreThreshold}
-                onChange={(e) =>
-                  setFormData({ ...formData, minimumScoreThreshold: parseFloat(e.target.value) })
-                }
-                className="w-full accent-blue-500"
-              />
+              <p className="text-[10px] text-slate-500 mt-2">
+                🏛️ <em>Fonction Publique (Mairie, Collectivités)</em> regroupe la Fonction Publique Territoriale (Mairies, Métropoles, Départements) issue notamment d'Emploi Territorial.
+              </p>
             </div>
           </div>
         </div>
