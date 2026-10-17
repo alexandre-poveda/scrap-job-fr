@@ -1,4 +1,6 @@
 ---
+export const prerender = true;
+
 import Layout from '../layouts/Layout.astro';
 import { SearchDashboard } from '../components/SearchDashboard';
 ---
@@ -22,5 +24,5 @@ import { SearchDashboard } from '../components/SearchDashboard';
   </section>
 
   <!-- Dashboard Interactif -->
-  <SearchDashboard client:load />
+  <SearchDashboard client:only="react" />
 </Layout>

@@ -14,5 +14,13 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          banner:
+            'if(typeof MessageChannel==="undefined"){class P{postMessage(){}close(){}}globalThis.MessageChannel=class MessageChannel{constructor(){this.port1=new P();this.port2=new P();}};};',
+        },
+      },
+    },
   },
 });
