@@ -56,6 +56,19 @@
       "source_location": "L6"
     },
     {
+      "id": "src_layouts_layout_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "src/layouts/Layout.astro",
+      "source_location": "L4"
+    },
+    {
       "id": "src_lib_types_candidatefile",
       "label": "CandidateFile",
       "_callable": true,
@@ -95,32 +108,6 @@
       "source_location": "L105"
     },
     {
-      "id": "src_lib_types_jobsourceid",
-      "label": "JobSourceId",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "jobsourceid",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "src_lib_types_jobsourceinfo",
-      "label": "JobSourceInfo",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "jobsourceinfo",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L21"
-    },
-    {
       "id": "src_lib_types_recruiterformanswer",
       "label": "RecruiterFormAnswer",
       "_callable": true,
@@ -132,19 +119,6 @@
       "norm_label": "recruiterformanswer",
       "source_file": "src/lib/types.ts",
       "source_location": "L65"
-    },
-    {
-      "id": "src_lib_types_scorebreakdown",
-      "label": "ScoreBreakdown",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "scorebreakdown",
-      "source_file": "src/lib/types.ts",
-      "source_location": "L29"
     },
     {
       "id": "src_lib_types_userprofile",
@@ -199,19 +173,6 @@
       "source_location": "L125"
     },
     {
-      "id": "src_layouts_layout_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "Layout.astro",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "src/layouts/Layout.astro",
-      "source_location": "L4"
-    },
-    {
       "id": "src_lib_career_ops_blacklist_filter_blacklistcheckresult",
       "label": "BlacklistCheckResult",
       "_callable": true,
@@ -223,6 +184,45 @@
       "norm_label": "blacklistcheckresult",
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
       "source_location": "L37"
+    },
+    {
+      "id": "src_lib_types_scorebreakdown",
+      "label": "ScoreBreakdown",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "scoring-engine.ts",
+      "file_type": "code",
+      "norm_label": "scorebreakdown",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_lib_types_jobsourceid",
+      "label": "JobSourceId",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "jobsourceid",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_lib_types_jobsourceinfo",
+      "label": "JobSourceInfo",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "jobsourceinfo",
+      "source_file": "src/lib/types.ts",
+      "source_location": "L21"
     },
     {
       "id": "src_components_applicationmodal_applicationmodal",
@@ -333,28 +333,52 @@
       "source_location": "L77"
     },
     {
-      "id": "src_lib_scrapers_local_search_executelocalsearch",
-      "label": "executeLocalSearch()",
+      "id": "src_lib_profile_profile_parser_extractlinkedindata",
+      "label": "extractLinkedInData()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "types.ts",
       "file_type": "code",
-      "norm_label": "executelocalsearch()",
-      "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L48"
+      "norm_label": "extractlinkedindata()",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L85"
     },
     {
-      "id": "src_lib_scrapers_local_search_resolvelocationdisplay",
-      "label": "resolveLocationDisplay()",
+      "id": "src_lib_profile_profile_parser_parsepdfbuffer",
+      "label": "parsePdfBuffer()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "types.ts",
       "file_type": "code",
-      "norm_label": "resolvelocationdisplay()",
-      "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L12"
+      "norm_label": "parsepdfbuffer()",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L265"
+    },
+    {
+      "id": "src_lib_profile_profile_parser_parseprofilefromtext",
+      "label": "parseProfileFromText()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "parseprofilefromtext()",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L205"
+    },
+    {
+      "id": "src_pages_api_parse_cv_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "src/pages/api/parse-cv.ts",
+      "source_location": "L4"
     },
     {
       "id": "src_lib_scrapers_base_createjoboffer",
@@ -366,7 +390,7 @@
       "file_type": "code",
       "norm_label": "createjoboffer()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L51"
+      "source_location": "L128"
     },
     {
       "id": "src_lib_scrapers_base_fetchwithtimeout",
@@ -378,7 +402,7 @@
       "file_type": "code",
       "norm_label": "fetchwithtimeout()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "id": "src_lib_scrapers_base_generatedomainfallbackoffers",
@@ -390,7 +414,19 @@
       "file_type": "code",
       "norm_label": "generatedomainfallbackoffers()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L73"
+      "source_location": "L164"
+    },
+    {
+      "id": "src_lib_scrapers_base_isgenericportalhomepage",
+      "label": "isGenericPortalHomepage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "aggregator.ts",
+      "file_type": "code",
+      "norm_label": "isgenericportalhomepage()",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L117"
     },
     {
       "id": "src_lib_scrapers_base_normalizecontracttype",
@@ -402,7 +438,7 @@
       "file_type": "code",
       "norm_label": "normalizecontracttype()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L37"
+      "source_location": "L38"
     },
     {
       "id": "src_lib_scrapers_emploi_territorial_scrapeemploiterritorial",
@@ -645,42 +681,6 @@
       "source_location": "L7"
     },
     {
-      "id": "src_lib_profile_profile_parser_extractlinkedindata",
-      "label": "extractLinkedInData()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "extractlinkedindata()",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L85"
-    },
-    {
-      "id": "src_lib_profile_profile_parser_parsepdfbuffer",
-      "label": "parsePdfBuffer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "parsepdfbuffer()",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L265"
-    },
-    {
-      "id": "src_lib_profile_profile_parser_parseprofilefromtext",
-      "label": "parseProfileFromText()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "parseprofilefromtext()",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L205"
-    },
-    {
       "id": "src_lib_scrapers_aggregator_aggregatejobs",
       "label": "aggregateJobs()",
       "_callable": true,
@@ -693,18 +693,6 @@
       "source_location": "L33"
     },
     {
-      "id": "src_pages_api_parse_cv_post",
-      "label": "POST()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "post()",
-      "source_file": "src/pages/api/parse-cv.ts",
-      "source_location": "L4"
-    },
-    {
       "id": "src_pages_api_search_post",
       "label": "POST()",
       "_callable": true,
@@ -715,6 +703,54 @@
       "norm_label": "post()",
       "source_file": "src/pages/api/search.ts",
       "source_location": "L7"
+    },
+    {
+      "id": "src_lib_scrapers_base_buildjobportalurl",
+      "label": "buildJobPortalUrl()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "buildjobportalurl()",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L70"
+    },
+    {
+      "id": "src_lib_scrapers_base_formatpublicationdate",
+      "label": "formatPublicationDate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "formatpublicationdate()",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L53"
+    },
+    {
+      "id": "src_lib_scrapers_local_search_executelocalsearch",
+      "label": "executeLocalSearch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "executelocalsearch()",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L48"
+    },
+    {
+      "id": "src_lib_scrapers_local_search_resolvelocationdisplay",
+      "label": "resolveLocationDisplay()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "resolvelocationdisplay()",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L12"
     },
     {
       "id": "src_components_applicationmodal",
@@ -783,6 +819,17 @@
       "source_location": "L35"
     },
     {
+      "id": "src_layouts_layout",
+      "label": "Layout.astro",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "layout.astro",
+      "source_file": "src/layouts/Layout.astro",
+      "source_location": "L1"
+    },
+    {
       "id": "src_lib_career_ops_application_helper",
       "label": "application-helper.ts",
       "_origin": "ast",
@@ -838,6 +885,17 @@
       "source_location": "L6"
     },
     {
+      "id": "src_lib_profile_profile_parser",
+      "label": "profile-parser.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "profile-parser.ts",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_lib_profile_profile_parser_default_profile",
       "label": "DEFAULT_PROFILE",
       "_origin": "ast",
@@ -849,39 +907,6 @@
       "source_location": "L10"
     },
     {
-      "id": "src_lib_scrapers_local_search",
-      "label": "local-search.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "local-search.ts",
-      "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_scrapers_sources",
-      "label": "scrapers/sources.ts",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "scrapers/sources.ts",
-      "source_file": "src/lib/scrapers/sources.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_scrapers_sources_job_sources",
-      "label": "JOB_SOURCES",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "types.ts",
-      "file_type": "code",
-      "norm_label": "job_sources",
-      "source_file": "src/lib/scrapers/sources.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "src_lib_types",
       "label": "types.ts",
       "_origin": "ast",
@@ -890,6 +915,17 @@
       "file_type": "code",
       "norm_label": "types.ts",
       "source_file": "src/lib/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_pages_api_parse_cv",
+      "label": "parse-cv.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "parse-cv.ts",
+      "source_file": "src/pages/api/parse-cv.ts",
       "source_location": "L1"
     },
     {
@@ -967,7 +1003,7 @@
       "file_type": "code",
       "norm_label": "user_agent",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "id": "src_lib_scrapers_emploi_territorial",
@@ -1078,17 +1114,6 @@
       "norm_label": "cheerio",
       "source_file": "package.json",
       "source_location": "L20"
-    },
-    {
-      "id": "src_layouts_layout",
-      "label": "Layout.astro",
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "Layout.astro",
-      "file_type": "code",
-      "norm_label": "layout.astro",
-      "source_file": "src/layouts/Layout.astro",
-      "source_location": "L1"
     },
     {
       "id": "astro_config",
@@ -1520,39 +1545,6 @@
       "source_location": "L14"
     },
     {
-      "id": "src_lib_profile_profile_parser",
-      "label": "profile-parser.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "profile-parser.ts",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_lib_scrapers_aggregator_scrapers_map",
-      "label": "SCRAPERS_MAP",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "scrapers_map",
-      "source_file": "src/lib/scrapers/aggregator.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_pages_api_parse_cv",
-      "label": "parse-cv.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "parse-cv.ts",
-      "source_file": "src/pages/api/parse-cv.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_pages_api_search",
       "label": "search.ts",
       "_origin": "ast",
@@ -1572,17 +1564,6 @@
       "file_type": "code",
       "norm_label": "career-ops.test.mjs",
       "source_file": "tests/career-ops.test.mjs",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_scrapers_test",
-      "label": "scrapers.test.mjs",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
-      "file_type": "code",
-      "norm_label": "scrapers.test.mjs",
-      "source_file": "tests/scrapers.test.mjs",
       "source_location": "L1"
     },
     {
@@ -2056,11 +2037,77 @@
       "source_location": "L2"
     },
     {
+      "id": "src_lib_scrapers_aggregator_scrapers_map",
+      "label": "SCRAPERS_MAP",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "scrapers_map",
+      "source_file": "src/lib/scrapers/aggregator.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_lib_scrapers_local_search",
+      "label": "local-search.ts",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "local-search.ts",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_scrapers_sources",
+      "label": "scrapers/sources.ts",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "scrapers/sources.ts",
+      "source_file": "src/lib/scrapers/sources.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_lib_scrapers_sources_job_sources",
+      "label": "JOB_SOURCES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "job_sources",
+      "source_file": "src/lib/scrapers/sources.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "tests_portal_urls_and_dates_test",
+      "label": "portal-urls-and-dates.test.mjs",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "portal-urls-and-dates.test.mjs",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_scrapers_test",
+      "label": "scrapers.test.mjs",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "local-search.ts",
+      "file_type": "code",
+      "norm_label": "scrapers.test.mjs",
+      "source_file": "tests/scrapers.test.mjs",
+      "source_location": "L1"
+    },
+    {
       "id": "src_styles_global",
       "label": "src_styles_global",
       "_origin": "semantic",
-      "community": 10,
-      "community_name": "Layout.astro",
+      "community": 0,
+      "community_name": "types.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "src_styles_global",
@@ -2071,8 +2118,8 @@
       "id": "ref_node_assert",
       "label": "ref_node_assert",
       "_origin": "semantic",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
+      "community": 8,
+      "community_name": "local-search.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_assert",
@@ -2083,8 +2130,8 @@
       "id": "ref_node_test",
       "label": "ref_node_test",
       "_origin": "semantic",
-      "community": 3,
-      "community_name": "scoring-engine.ts",
+      "community": 8,
+      "community_name": "local-search.ts",
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_test",
@@ -2150,7 +2197,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1189",
+      "source_location": "L1208",
       "weight": 1.0
     },
     {
@@ -2162,7 +2209,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1198",
+      "source_location": "L1217",
       "weight": 1.0
     },
     {
@@ -2174,7 +2221,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1206",
+      "source_location": "L1225",
       "weight": 1.0
     },
     {
@@ -2222,7 +2269,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L911",
+      "source_location": "L930",
       "weight": 1.0
     },
     {
@@ -2431,6 +2478,42 @@
     },
     {
       "source": "src_lib_scrapers_base_createjoboffer",
+      "target": "src_lib_scrapers_base_isgenericportalhomepage",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L142",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base_createjoboffer",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L143",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base_createjoboffer",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base_createjoboffer",
       "target": "src_lib_career_ops_skill_extract_extractskills",
       "relation": "calls",
       "_origin": "ast",
@@ -2438,7 +2521,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L65",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -2450,7 +2533,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L90",
+      "source_location": "L185",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base_generatedomainfallbackoffers",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base_generatedomainfallbackoffers",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -2798,7 +2905,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L165",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -2822,7 +2929,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L76",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_local_search_executelocalsearch",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_local_search_executelocalsearch",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -3906,6 +4037,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_scrapers_base",
+      "target": "src_lib_scrapers_sources_job_sources",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
       "source": "src_lib_scrapers_emploi_territorial",
       "target": "src_lib_types_joboffer",
       "relation": "imports",
@@ -4471,7 +4614,31 @@
     },
     {
       "source": "src_lib_scrapers_local_search",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_local_search",
       "target": "src_lib_scrapers_base_createjoboffer",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/scrapers/local-search.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_local_search",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -4863,6 +5030,90 @@
       "context": "import",
       "source_file": "tests/career-ops.test.mjs",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_sources_job_sources",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_profile_profile_parser_default_profile",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_base_createjoboffer",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_base_generatedomainfallbackoffers",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_local_search_executelocalsearch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -5584,6 +5835,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_lib_scrapers_base",
+      "target": "src_lib_scrapers_sources",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
       "source": "src_lib_scrapers_emploi_territorial",
       "target": "ref_cheerio",
       "relation": "imports_from",
@@ -6184,6 +6447,78 @@
       "context": "import",
       "source_file": "tests/career-ops.test.mjs",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "ref_node_test",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_sources",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_profile_profile_parser",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "ref_node_assert",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_base",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_portal_urls_and_dates_test",
+      "target": "src_lib_scrapers_local_search",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/portal-urls-and-dates.test.mjs",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -7166,18 +7501,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
       "source": "src_lib_scrapers_base",
-      "target": "src_lib_scrapers_base_normalizecontracttype",
+      "target": "src_lib_scrapers_base_isgenericportalhomepage",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L37",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -7188,7 +7523,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L51",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -7199,7 +7534,40 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L73",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base",
+      "target": "src_lib_scrapers_base_normalizecontracttype",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base",
+      "target": "src_lib_scrapers_base_formatpublicationdate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_scrapers_base",
+      "target": "src_lib_scrapers_base_buildjobportalurl",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/scrapers/base.ts",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -7210,7 +7578,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -7675,5 +8043,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f0a48c16c47f5501e4e746fee5fa0addd49ad152"
+  "built_at_commit": "6bcade1f34d78ca4e4c41b97e90cf5f9d5499862"
 }

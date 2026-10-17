@@ -17,6 +17,8 @@ import {
   SlidersHorizontal,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Building2,
   Layers,
   CheckCircle,
@@ -106,6 +108,38 @@ export const SearchDashboard: React.FC = () => {
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  // État de dépliage des cartes dans l'onglet Candidatures
+  const [expandedAppIds, setExpandedAppIds] = useState<Record<string, boolean>>({});
+
+  const toggleAppExpand = (appId: string) => {
+    setExpandedAppIds((prev) => ({
+      ...prev,
+      [appId]: !prev[appId],
+    }));
+  };
+
+  const expandAllApps = () => {
+    const allExpanded: Record<string, boolean> = {};
+    savedApplications.forEach((a) => {
+      allExpanded[a.id] = true;
+    });
+    setExpandedAppIds(allExpanded);
+  };
+
+  const collapseAllApps = () => {
+    setExpandedAppIds({});
+  };
+
+  // Helper pour savoir si une offre a déjà été postulée
+  const getAppliedApplication = (job: JobOffer) => {
+    return savedApplications.find(
+      (app) =>
+        app.jobId === job.id ||
+        (app.jobTitle.trim().toLowerCase() === job.title.trim().toLowerCase() &&
+         app.company.trim().toLowerCase() === job.company.trim().toLowerCase())
+    );
   };
 
   const handleSaveApplication = (newApp: JobApplication) => {
@@ -656,6 +690,8 @@ export const SearchDashboard: React.FC = () => {
           {jobs.map((job) => {
             const score = job.score || 3.0;
             const sourceInfo = JOB_SOURCES[job.source];
+            const appliedApp = getAppliedApplication(job);
+            const isApplied = Boolean(appliedApp);
 
             let scoreBadgeColor = 'text-blue-400 bg-blue-500/10 border-blue-500/20';
             if (score >= 4.5) scoreBadgeColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
@@ -665,9 +701,26 @@ export const SearchDashboard: React.FC = () => {
             return (
               <div
                 key={job.id}
-                className="group p-5 rounded-2xl bg-[#12161f] border border-[#242c3d] hover:border-blue-500/40 transition-all duration-200 flex flex-col justify-between shadow-lg"
+                className={`group p-5 rounded-2xl transition-all duration-200 flex flex-col justify-between shadow-lg ${
+                  isApplied
+                    ? 'bg-[#0a2318] border-2 border-emerald-500/80 hover:border-emerald-400 shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+                    : 'bg-[#12161f] border border-[#242c3d] hover:border-blue-500/40'
+                }`}
               >
                 <div>
+                  {/* Bannière Déjà Postulé */}
+                  {isApplied && (
+                    <div className="mb-3 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-between text-xs font-bold shadow-sm">
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>✓ Vous avez déjà postulé à cette offre</span>
+                      </span>
+                      <span className="text-[11px] font-medium text-emerald-400/90 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                        {appliedApp?.dateCreated ? `Postulé le ${appliedApp.dateCreated}` : 'Candidature envoyée'}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Entête Carte */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -755,14 +808,26 @@ export const SearchDashboard: React.FC = () => {
                   </button>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setApplicationJob(job)}
-                      className="px-3.5 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-blue-600/25 transition flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-                      <span>⚡ Pré-remplir</span>
-                    </button>
+                    {isApplied ? (
+                      <button
+                        type="button"
+                        onClick={() => setApplicationJob(job)}
+                        className="px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer"
+                        title="Revoir ou modifier votre candidature enregistrée"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-100" />
+                        <span>✓ Déjà postulé (Revoir)</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setApplicationJob(job)}
+                        className="px-3.5 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-blue-600/25 transition flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                        <span>⚡ Pré-remplir</span>
+                      </button>
+                    )}
 
                     <a
                       href={job.url}
@@ -824,13 +889,30 @@ export const SearchDashboard: React.FC = () => {
                 {belowThresholdJobs.map((job) => {
                   const score = job.score || 2.5;
                   const sourceInfo = JOB_SOURCES[job.source];
+                  const appliedApp = getAppliedApplication(job);
+                  const isApplied = Boolean(appliedApp);
 
                   return (
                     <div
                       key={job.id}
-                      className="p-5 rounded-2xl bg-[#12161f]/70 border border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between shadow"
+                      className={`p-5 rounded-2xl transition-all flex flex-col justify-between shadow ${
+                        isApplied
+                          ? 'bg-[#0a2318] border-2 border-emerald-500/70 shadow-emerald-950/40 ring-1 ring-emerald-500/20'
+                          : 'bg-[#12161f]/70 border border-slate-800 hover:border-amber-500/40'
+                      }`}
                     >
                       <div>
+                        {/* Bannière Déjà Postulé */}
+                        {isApplied && (
+                          <div className="mb-2.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-between text-xs font-bold shadow-sm">
+                            <span className="flex items-center gap-1.5">
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>✓ Déjà postulé à cette offre</span>
+                            </span>
+                            <span className="text-[10px] text-emerald-400/90">{appliedApp?.dateCreated}</span>
+                          </div>
+                        )}
+
                         <div className="flex items-start justify-between gap-3 mb-2.5">
                           <div className="flex flex-wrap items-center gap-2">
                             <span
@@ -895,13 +977,24 @@ export const SearchDashboard: React.FC = () => {
                         </button>
 
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setApplicationJob(job)}
-                            className="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
-                          >
-                            Pré-remplir quand même
-                          </button>
+                          {isApplied ? (
+                            <button
+                              type="button"
+                              onClick={() => setApplicationJob(job)}
+                              className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition cursor-pointer flex items-center gap-1"
+                            >
+                              <CheckCircle className="w-3 h-3 text-emerald-100" />
+                              <span>Déjà postulé</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setApplicationJob(job)}
+                              className="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
+                            >
+                              Pré-remplir quand même
+                            </button>
+                          )}
                           <a
                             href={job.url}
                             target="_blank"
@@ -933,40 +1026,56 @@ export const SearchDashboard: React.FC = () => {
       {/* Onglet Mes Candidatures */}
       {activeTab === 'applications' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#242c3d]/60">
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                <Send className="w-5 h-5 text-blue-400" />
-                <span>Mes Candidatures & Formulaires</span>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <Send className="w-5 h-5 text-emerald-400" />
+                <span>Mes Candidatures</span>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {savedApplications.length}
                 </span>
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Toutes les candidatures pré-remplies par l'assistant. Vérifiez, modifiez et publiez sur le site officiel de l'employeur.
+                Cliquez sur une candidature pour la déplier et consulter votre lettre personnalisée, votre pitch et vos pièces jointes.
               </p>
             </div>
 
             {savedApplications.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('search')}
-                className="px-4 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 transition flex items-center gap-2 cursor-pointer"
-              >
-                <Search className="w-3.5 h-3.5 text-blue-400" />
-                <span>Rechercher d'autres offres</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={expandAllApps}
+                  className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-800 transition cursor-pointer"
+                >
+                  Tout déplier
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAllApps}
+                  className="px-3 py-1.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-800 transition cursor-pointer"
+                >
+                  Tout replier
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('search')}
+                  className="px-4 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Rechercher d'autres offres</span>
+                </button>
+              </div>
             )}
           </div>
 
           {savedApplications.length === 0 ? (
             <div className="p-12 text-center rounded-2xl bg-[#12161f] border border-[#242c3d] space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Send className="w-7 h-7" />
               </div>
               <h3 className="text-lg font-bold text-white">Aucune candidature enregistrée pour le moment</h3>
               <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                Trouvez des offres dans l'onglet <strong>Recherche d'offres</strong>, puis cliquez sur <strong>⚡ Pré-remplir</strong> pour générer instantanément votre lettre adaptée, votre pitch et vos pièces jointes. Vous validez tout avant la publication.
+                Trouvez des offres dans l'onglet <strong>Recherche d'offres</strong>, puis cliquez sur <strong>⚡ Pré-remplir</strong> pour générer instantanément votre lettre adaptée, votre pitch et vos pièces jointes.
               </p>
               <button
                 type="button"
@@ -978,19 +1087,27 @@ export const SearchDashboard: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {savedApplications.map((app) => {
                 const isSubmitted = app.status === 'submitted';
                 const sourceInfo = JOB_SOURCES[app.source];
+                const isExpanded = Boolean(expandedAppIds[app.id]);
 
                 return (
                   <div
                     key={app.id}
-                    className="p-6 rounded-2xl bg-[#12161f] border border-[#242c3d] shadow-xl space-y-5"
+                    className={`rounded-2xl border transition-all duration-200 shadow-lg overflow-hidden ${
+                      isSubmitted
+                        ? 'bg-[#0c2419] border-emerald-500/50 hover:border-emerald-400'
+                        : 'bg-[#12161f] border-[#242c3d] hover:border-slate-700'
+                    }`}
                   >
-                    {/* Entête Candidature */}
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-[#242c3d]">
-                      <div className="space-y-1">
+                    {/* En-tête concise (toujours visible, cliquable pour déplier/replier) */}
+                    <div
+                      onClick={() => toggleAppExpand(app.id)}
+                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-white/[0.03] transition"
+                    >
+                      <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <span
                             className="px-2.5 py-0.5 text-[11px] font-semibold rounded-md"
@@ -1005,21 +1122,25 @@ export const SearchDashboard: React.FC = () => {
                             {app.contractType}
                           </span>
                           <span
-                            className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-md border ${
+                            className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-md border flex items-center gap-1 ${
                               isSubmitted
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                             }`}
                           >
-                            {isSubmitted ? '✓ Publiée / Envoyée' : '⏳ Brouillon vérifié'}
+                            <CheckCircle className="w-3 h-3 text-emerald-400" />
+                            <span>{isSubmitted ? 'Candidature envoyée' : 'Brouillon prêt'}</span>
                           </span>
-                          <span className="text-xs text-slate-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {app.dateCreated}
+                          <span className="text-xs text-slate-400 flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-500" />
+                            <span>{app.dateCreated}</span>
                           </span>
                         </div>
 
-                        <h3 className="text-lg font-bold text-white mt-1">{app.jobTitle}</h3>
+                        <h3 className="text-lg font-bold text-white tracking-tight truncate">
+                          {app.jobTitle}
+                        </h3>
+
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
                           <span className="flex items-center gap-1 font-medium text-slate-300">
                             <Building2 className="w-3.5 h-3.5 text-slate-500" />
@@ -1029,173 +1150,169 @@ export const SearchDashboard: React.FC = () => {
                             <MapPin className="w-3.5 h-3.5 text-slate-500" />
                             {app.jobLocation}
                           </span>
+                          <span className="text-blue-400 flex items-center gap-1">
+                            <FileCheck className="w-3.5 h-3.5" />
+                            {app.attachedFiles?.[0] || 'CV.pdf'}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 self-start">
+                      {/* Boutons d'action rapides et bouton Déplier / Replier */}
+                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                        <a
+                          href={app.jobUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg border border-slate-700 transition flex items-center gap-1.5"
+                          title={`Ouvrir cette offre sur ${sourceInfo?.name || app.source}`}
+                        >
+                          <span>Voir l'offre</span>
+                          <ExternalLink className="w-3 h-3 text-slate-400" />
+                        </a>
+
                         <button
                           type="button"
-                          onClick={() => handleDeleteApplication(app.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteApplication(app.id);
+                          }}
                           className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
                           title="Supprimer cette candidature"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleAppExpand(app.id);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer border ${
+                            isExpanded
+                              ? 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40'
+                              : 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600'
+                          }`}
+                        >
+                          <span>{isExpanded ? 'Replier' : 'Déplier les détails'}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
+                        </button>
                       </div>
                     </div>
 
-                    {/* Données Candidat & Fichiers rattachés */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Candidat :</span>
-                        <span className="font-semibold text-slate-200">{app.candidateName}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Contact :</span>
-                        <span className="text-slate-300">
-                          {app.candidateEmail || 'Non spécifié'} {app.candidatePhone ? `• ${app.candidatePhone}` : ''}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-500 block text-[11px]">Pièce jointe :</span>
-                        <span className="text-blue-400 font-medium flex items-center gap-1">
-                          <FileCheck className="w-3.5 h-3.5" />
-                          {app.attachedFiles?.[0] || 'CV.pdf'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Lettre de motivation générée */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-slate-300">
-                          Lettre de motivation personnalisée
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDownload(
-                                app.coverLetter,
-                                `Lettre_${app.company.replace(/\s+/g, '_')}_${app.jobTitle.replace(/\s+/g, '_')}.txt`
-                              )
-                            }
-                            className="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <Download className="w-3 h-3" />
-                            <span>Télécharger</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(app.coverLetter, `letter-${app.id}`)}
-                            className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
-                          >
-                            {copiedField === `letter-${app.id}` ? (
-                              <Check className="w-3 h-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                            <span>{copiedField === `letter-${app.id}` ? 'Copié !' : 'Copier lettre'}</span>
-                          </button>
+                    {/* Contenu détaillé visible uniquement quand la carte est dépliée */}
+                    {isExpanded && (
+                      <div className="p-6 pt-0 border-t border-[#242c3d]/80 space-y-5 animate-in fade-in duration-200">
+                        {/* Données Candidat & Fichiers */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 mt-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+                          <div>
+                            <span className="text-slate-500 block text-[11px]">Candidat :</span>
+                            <span className="font-semibold text-slate-200">{app.candidateName}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-[11px]">Contact :</span>
+                            <span className="text-slate-300">
+                              {app.candidateEmail || 'Non spécifié'} {app.candidatePhone ? `• ${app.candidatePhone}` : ''}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-[11px]">Pièce jointe :</span>
+                            <span className="text-blue-400 font-medium flex items-center gap-1">
+                              <FileCheck className="w-3.5 h-3.5" />
+                              {app.attachedFiles?.[0] || 'CV.pdf'}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-3.5 bg-slate-950 border border-slate-800/80 rounded-xl text-xs text-slate-300 whitespace-pre-line max-h-48 overflow-y-auto font-sans leading-relaxed">
-                        {app.coverLetter}
-                      </div>
-                    </div>
 
-                    {/* Pitch court */}
-                    {app.pitch && (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-slate-400">
-                            Pitch d'accroche court
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(app.pitch, `pitch-${app.id}`)}
-                            className="px-2 py-0.5 text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1 cursor-pointer"
-                          >
-                            {copiedField === `pitch-${app.id}` ? (
-                              <Check className="w-3 h-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                            <span>{copiedField === `pitch-${app.id}` ? 'Copié !' : 'Copier'}</span>
-                          </button>
+                        {/* Lettre de motivation personnalisée */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-slate-300">
+                              Lettre de motivation personnalisée pour ce poste
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleDownload(
+                                    app.coverLetter,
+                                    `Lettre_${app.company.replace(/\s+/g, '_')}_${app.jobTitle.replace(/\s+/g, '_')}.txt`
+                                  )
+                                }
+                                className="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Download className="w-3 h-3" />
+                                <span>Télécharger</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(app.coverLetter, `letter-${app.id}`)}
+                                className="px-2.5 py-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                              >
+                                {copiedField === `letter-${app.id}` ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                                <span>{copiedField === `letter-${app.id}` ? 'Copié !' : 'Copier lettre'}</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-slate-950 border border-slate-800/80 rounded-xl text-xs text-slate-300 whitespace-pre-line max-h-56 overflow-y-auto font-sans leading-relaxed">
+                            {app.coverLetter}
+                          </div>
                         </div>
-                        <div className="p-2.5 bg-slate-950/70 border border-slate-800/70 rounded-lg text-xs text-slate-300 italic">
-                          "{app.pitch}"
-                        </div>
-                      </div>
-                    )}
 
-                    {/* Réponses au questionnaire du formulaire recruteur */}
-                    {app.formAnswers && app.formAnswers.length > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                            <CheckSquare className="w-3.5 h-3.5" />
-                            <span>Réponses aux questions du formulaire ({app.formAnswers.length})</span>
-                          </span>
+                        {/* Pitch d'accroche court */}
+                        {app.pitch && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-slate-400">
+                                Pitch d'accroche court
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(app.pitch, `pitch-${app.id}`)}
+                                className="px-2 py-0.5 text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1 cursor-pointer"
+                              >
+                                {copiedField === `pitch-${app.id}` ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                                <span>{copiedField === `pitch-${app.id}` ? 'Copié !' : 'Copier'}</span>
+                              </button>
+                            </div>
+                            <div className="p-3 bg-slate-950/70 border border-slate-800/70 rounded-lg text-xs text-slate-300 italic">
+                              "{app.pitch}"
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bouton direct d'accès à l'offre */}
+                        <div className="pt-3 border-t border-[#242c3d] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <p className="text-[11px] text-slate-400">
+                            Prêt(e) à postuler ? Ouvrez le portail recruteur officiel pour déposer votre candidature :
+                          </p>
                           <button
                             type="button"
                             onClick={() => {
-                              const fullText = (app.formAnswers || [])
-                                .map((item, idx) => `Q${idx + 1} : ${item.label}\nRéponse :\n${item.answer}`)
-                                .join('\n\n---\n\n');
-                              handleCopy(fullText, `answers-${app.id}`);
+                              handleSaveApplication({ ...app, status: 'submitted' });
+                              window.open(app.jobUrl, '_blank', 'noopener,noreferrer');
                             }}
-                            className="px-2.5 py-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                            className="px-4 py-2 text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl shadow-md shadow-emerald-600/25 transition flex items-center justify-center gap-2 cursor-pointer"
                           >
-                            {copiedField === `answers-${app.id}` ? (
-                              <Check className="w-3.5 h-3.5" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                            <span>{copiedField === `answers-${app.id}` ? 'Tout copié !' : 'Tout copier (Q&R)'}</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Accéder à l'offre sur {sourceInfo?.name || 'le site'}</span>
                           </button>
-                        </div>
-
-                        <div className="space-y-2 max-h-48 overflow-y-auto p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
-                          {app.formAnswers.map((fa, idx) => (
-                            <div key={idx} className="text-xs space-y-1 pb-2 border-b border-slate-800/60 last:border-b-0 last:pb-0">
-                              <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
-                                <span>{fa.label}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopy(fa.answer, `fa-${app.id}-${idx}`)}
-                                  className="text-blue-400 hover:text-blue-300 ml-2 shrink-0 cursor-pointer"
-                                >
-                                  {copiedField === `fa-${app.id}-${idx}` ? '✓ Copié' : 'Copier'}
-                                </button>
-                              </div>
-                              <p className="text-slate-200 text-xs font-sans pl-1 whitespace-pre-line">
-                                {fa.answer}
-                              </p>
-                            </div>
-                          ))}
                         </div>
                       </div>
                     )}
-
-                    {/* Validation finale & Publication */}
-                    <div className="pt-3 border-t border-[#242c3d] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <p className="text-[11px] text-slate-500">
-                        C'est vous qui avez le contrôle final : ouvrez le formulaire officiel pour soumettre votre candidature.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleSaveApplication({ ...app, status: 'submitted' });
-                          window.open(app.jobUrl, '_blank', 'noopener,noreferrer');
-                        }}
-                        className="px-4 py-2 text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Accéder à l'offre & Publier</span>
-                      </button>
-                    </div>
                   </div>
                 );
               })}
