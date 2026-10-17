@@ -1,6 +1,6 @@
 import React from 'react';
 import type { JobOffer } from '../lib/types.ts';
-import { X, ExternalLink, CheckCircle2, AlertCircle, Award, MapPin, Building2 } from 'lucide-react';
+import { X, ExternalLink, CheckCircle2, AlertCircle, Award, MapPin, Building2, Clock, Calendar } from 'lucide-react';
 import { JOB_SOURCES } from '../lib/scrapers/sources.ts';
 
 interface ScoreDetailModalProps {
@@ -35,12 +35,17 @@ export const ScoreDetailModal: React.FC<ScoreDetailModalProps> = ({ job, onClose
                 {sourceInfo?.name || job.source}
               </span>
               <span className="text-xs text-slate-400 font-medium">Contrat {job.contractType}</span>
+              <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-800/80 text-slate-300 rounded border border-slate-700/60 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-blue-400" />
+                <span>{job.datePosted || 'Publiée récemment'}</span>
+              </span>
             </div>
             <h2 className="text-xl font-bold tracking-tight text-white">{job.title}</h2>
             <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-slate-400">
-              <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" /> {job.company}</span>
-              <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {job.location}</span>
+              <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5 text-slate-500" /> {job.company}</span>
+              <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-500" /> {job.location}</span>
               {job.salary && <span className="font-semibold text-emerald-400">{job.salary}</span>}
+              <span className="flex items-center gap-1 text-slate-300"><Calendar className="w-3.5 h-3.5 text-slate-500" /> {job.datePosted || 'Publiée récemment'}</span>
             </div>
           </div>
           <button

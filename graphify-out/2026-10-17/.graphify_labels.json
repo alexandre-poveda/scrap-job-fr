@@ -1,12 +1,11 @@
 {
-  "0": "SearchDashboard.tsx",
-  "1": "types.ts",
+  "0": "types.ts",
+  "1": "aggregator.ts",
   "2": "package.json",
   "3": "scoring-engine.ts",
   "4": "dependencies",
   "5": "🇫🇷 CareerOps France — AI Job Search & Matching Web App",
   "6": "Spécification Technique & Fonctionnelle : CareerOps France (Astro Web App)",
   "7": "compilerOptions",
-  "8": "ApplicationModal.tsx",
   "10": "Layout.astro"
 }

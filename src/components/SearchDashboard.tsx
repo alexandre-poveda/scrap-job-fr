@@ -680,6 +680,10 @@ export const SearchDashboard: React.FC = () => {
                       <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-800 text-slate-300 rounded-md border border-slate-700">
                         {job.contractType}
                       </span>
+                      <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-800/80 text-slate-300 rounded-md border border-slate-700 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-blue-400" />
+                        <span>{job.datePosted || 'Publiée récemment'}</span>
+                      </span>
                     </div>
 
                     <div className={`px-2.5 py-1 rounded-lg border text-xs font-extrabold flex items-center gap-1 ${scoreBadgeColor}`}>
@@ -705,6 +709,10 @@ export const SearchDashboard: React.FC = () => {
                     {job.salary && (
                       <span className="text-emerald-400 font-semibold">{job.salary}</span>
                     )}
+                    <span className="flex items-center gap-1 text-slate-400">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                      <span>{job.datePosted || 'Date récente'}</span>
+                    </span>
                   </div>
 
                   {/* Résumé évaluation */}
@@ -761,6 +769,7 @@ export const SearchDashboard: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg border border-slate-700 transition flex items-center gap-1.5"
+                      title={`Ouvrir directement cette offre sur ${sourceInfo?.name || job.source}`}
                     >
                       <span>Voir l'offre</span>
                       <ExternalLink className="w-3 h-3 text-slate-400" />
@@ -833,6 +842,10 @@ export const SearchDashboard: React.FC = () => {
                             <span className="px-2 py-0.5 text-[10px] bg-slate-800 text-slate-400 rounded">
                               {job.contractType}
                             </span>
+                            <span className="px-2 py-0.5 text-[10px] bg-slate-800/80 text-slate-300 rounded border border-slate-700/60 flex items-center gap-1">
+                              <Clock className="w-2.5 h-2.5 text-blue-400" />
+                              <span>{job.datePosted || 'Publiée récemment'}</span>
+                            </span>
                             <span className="px-2 py-0.5 text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded font-medium">
                               Note sous le seuil ({score.toFixed(1)}/5)
                             </span>
@@ -852,6 +865,10 @@ export const SearchDashboard: React.FC = () => {
                           <span className="flex items-center gap-1">
                             <MapPin className="w-3.5 h-3.5 text-slate-500" />
                             {job.location}
+                          </span>
+                          <span className="flex items-center gap-1 text-slate-400">
+                            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                            <span>{job.datePosted || 'Date récente'}</span>
                           </span>
                         </div>
 
@@ -889,8 +906,10 @@ export const SearchDashboard: React.FC = () => {
                             href={job.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 text-xs bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-800 transition"
+                            className="px-2.5 py-1.5 text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg border border-slate-800 transition flex items-center gap-1"
+                            title={`Ouvrir directement cette offre sur ${sourceInfo?.name || job.source}`}
                           >
+                            <span>Voir l'offre</span>
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </div>

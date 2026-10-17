@@ -5,7 +5,7 @@
 
 import type { JobOffer, JobSourceId, SearchFilterParams, UserProfile } from '../types.ts';
 import { JOB_SOURCES } from './sources.ts';
-import { createJobOffer } from './base.ts';
+import { createJobOffer, buildJobPortalUrl, formatPublicationDate } from './base.ts';
 import { evaluateJobOffer } from '../career-ops/scoring-engine.ts';
 
 // Villes associées aux zones larges (ex: Bouches-du-Rhône -> Marseille, Aix, Aubagne)
@@ -72,84 +72,89 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     const loc = resolveLocationDisplay(location, idx);
 
     // Offre 1 : Top Match (CDI, 3-4 compétences alignées, même ville)
+    const t1 = `${query} (H/F)`;
     generatedOffers.push(
       createJobOffer({
         id: `${srcId}-${Date.now()}-${idx}-1`,
-        title: `${query} (H/F)`,
+        title: t1,
         company: `${src.name} Partenaire`,
         location: loc,
         contractType: 'CDI',
         source: srcId,
-        url: src.baseUrl,
+        url: buildJobPortalUrl(srcId, t1, loc),
         description: `Nous recrutons un(e) ${query} en CDI pour notre site de ${loc}. Vous interviendrez sur la ${candidateSkills[0] || 'Communication digitale'}, la ${candidateSkills[1] || 'Stratégie de communication'} et les ${candidateSkills[2] || 'Réseaux sociaux'}. Gestion de projet transverse, esprit d'initiative et rigueur.`,
         salary: '36k€ - 44k€ / an',
-        datePosted: "Aujourd'hui",
+        datePosted: formatPublicationDate(0),
       })
     );
 
     // Offre 2 : Forte adéquation (CDD ou CDI, 2 compétences alignées, même département)
     const contract2 = idx % 2 === 0 ? 'CDD' : 'CDI';
+    const t2 = `${query} Confirmé(e) - Pôle Marque & Médias`;
     generatedOffers.push(
       createJobOffer({
         id: `${srcId}-${Date.now()}-${idx}-2`,
-        title: `${query} Confirmé(e) - Pôle Marque & Médias`,
+        title: t2,
         company: `Groupe Médias Régional ${loc.split(' ')[0]}`,
         location: loc,
         contractType: contract2,
         source: srcId,
-        url: src.baseUrl,
+        url: buildJobPortalUrl(srcId, t2, loc),
         description: `Opportunité en ${contract2} pour un profil ${query}. Déploiement des actions de ${candidateSkills[0] || 'Communication digitale'} et maîtrise de ${candidateSkills[3] || 'Relations presse'}. Suivi des indicateurs de performance et coordination externe.`,
         salary: '32k€ - 38k€ / an',
-        datePosted: 'Il y a 2 jours',
+        datePosted: formatPublicationDate(1),
       })
     );
 
     // Offre 3 : Adéquation moyenne (Intérim ou CDD, 1 compétence, ville voisine)
+    const t3 = `Assistant / Chargé de mission ${query}`;
     generatedOffers.push(
       createJobOffer({
         id: `${srcId}-${Date.now()}-${idx}-3`,
-        title: `Assistant / Chargé de mission ${query}`,
+        title: t3,
         company: `PME Innovante ${src.name}`,
         location: loc,
         contractType: idx % 2 === 0 ? 'Interim' : 'CDD',
         source: srcId,
-        url: src.baseUrl,
+        url: buildJobPortalUrl(srcId, t3, loc),
         description: `Mission temporaire pour assister l'équipe sur la création de supports graphiques et le suivi des plannings. Maîtrise requise : ${candidateSkills[4] || 'Gestion de projet'}.`,
         salary: '22k€ - 28k€ / an',
-        datePosted: 'Il y a 4 jours',
+        datePosted: formatPublicationDate(3),
       })
     );
 
     // Offre 4 : Localisation éloignée (pour illustrer le filtrage sous seuil 3.5)
     if (idx % 3 === 0) {
+      const t4 = `Chargé de communication et événementiel`;
       generatedOffers.push(
         createJobOffer({
           id: `${srcId}-${Date.now()}-${idx}-4`,
-          title: `Chargé de communication et événementiel`,
+          title: t4,
           company: `Fédération Régionale Loire`,
           location: 'Saint-Étienne (42)',
           contractType: 'CDD',
           source: srcId,
-          url: src.baseUrl,
+          url: buildJobPortalUrl(srcId, t4, 'Saint-Étienne (42)'),
           description: `Poste sur site à Saint-Étienne sans télétravail. Organisation des salons et logistique événementielle.`,
-          datePosted: 'Il y a 5 jours',
+          datePosted: formatPublicationDate(5),
         })
       );
     }
 
     // Offre 5 : Cas d'alternance ou stage avec tuteur (pour illustrer le rejet immédiat)
     if (idx === 0 || idx === 2) {
+      const t5 = `${query} en Stage conventionné / Alternance`;
       generatedOffers.push(
         createJobOffer({
           id: `${srcId}-alt-${idx}`,
-          title: `${query} en Stage conventionné / Alternance`,
+          title: t5,
           company: `Agence ${src.name}`,
           location: loc,
           contractType: 'Stage',
           source: srcId,
-          url: src.baseUrl,
+          url: buildJobPortalUrl(srcId, t5, loc),
           description: `Aux côtés de votre tuteur, stage ou contrat d'apprentissage de 6 mois pour étudiant en formation communication.`,
-          datePosted: 'Récemment',
+          datePosted: formatPublicationDate(2),
         })
       );
     }

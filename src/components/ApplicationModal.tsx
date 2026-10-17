@@ -195,6 +195,10 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
               <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                 {job.contractType}
               </span>
+              <span className="flex items-center gap-1 text-slate-300">
+                <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                <span>{job.datePosted || 'Publiée récemment'}</span>
+              </span>
               {job.score && (
                 <span className="font-bold text-emerald-400">
                   ★ {job.score.toFixed(1)}/5 Match
