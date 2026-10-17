@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SearchDashboard } from '../components/SearchDashboard';
+---
+
+<Layout>
+  <!-- Hero Section Minimaliste -->
+  <section class="border-b border-[#242c3d] bg-gradient-to-b from-[#10141d] to-[#0a0c10] py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+        <span>🚀 Moteur Career-Ops pour le marché français</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-3xl mx-auto font-['Space_Grotesk'] leading-tight">
+        Ne gardez que les <span class="bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400 bg-clip-text text-transparent">meilleures offres</span> adaptées à votre CV.
+      </h1>
+
+      <p class="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        Agrégation simultanée sur les 9 plus grands sites d'emploi en France. Élimination automatique des alternances et stages indésirables, et scoring 1-5 étoiles basé sur vos vraies compétences.
+      </p>
+    </div>
+  </section>
+
+  <!-- Dashboard Interactif -->
+  <SearchDashboard client:load />
+</Layout>

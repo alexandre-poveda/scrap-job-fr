@@ -1,0 +1,84 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'CareerOps France — Recherche d\'emploi & Matching IA',
+  description = 'Scannez les 9 plus grands sites d\'emploi français, éliminez les alternances et ne gardez que les meilleures offres scorées selon votre CV.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#0a0c10] text-[#f0f4fc] antialiased selection:bg-blue-600 selection:text-white flex flex-col min-h-screen">
+    <!-- Header Minimaliste -->
+    <header class="border-b border-[#242c3d] bg-[#0d1017]/90 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-black text-white text-base shadow-lg shadow-blue-500/20">
+            C
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-base tracking-tight font-['Space_Grotesk'] text-white">CareerOps</span>
+              <span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                FRANCE
+              </span>
+            </div>
+            <p class="text-[10px] text-slate-400 hidden sm:block">Filtre d'offres d'emploi & Scoring ATS open-source</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>9 plateformes connectées</span>
+          </div>
+          <a
+            href="https://github.com/career-ops-hq/career-ops"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition flex items-center gap-1.5"
+          >
+            <span>GitHub Career-Ops</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[#242c3d] bg-[#0c0f14] py-8 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4 space-y-2">
+        <p>
+          CareerOps France • Conçu pour les candidats français • Basé sur le manifeste open source Career-Ops.
+        </p>
+        <p class="text-[11px] text-slate-600">
+          France Travail • Indeed • HugoDécrypte Jobs • Manpower • Tertio RH • HelloWork • GoodJob • Le Job Adéquat • Emploi Territorial
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
