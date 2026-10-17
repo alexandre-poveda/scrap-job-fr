@@ -9,6 +9,9 @@ import { extractText } from 'unpdf';
 
 export const DEFAULT_PROFILE: UserProfile = {
   name: 'Alexandre Dupont',
+  email: 'alexandre.dupont@email.fr',
+  phone: '06 12 34 56 78',
+  city: 'Marseille (13)',
   title: 'Chargé de communication',
   summary: 'Professionnel de la communication et du marketing digital. Recherche activement un CDI, CDD ou mission dans un environnement stimulant.',
   skills: [
@@ -26,8 +29,40 @@ export const DEFAULT_PROFILE: UserProfile = {
   experienceYears: 3,
   preferredLocations: ['Bouches-du-Rhône (13)', 'PACA', 'Marseille (13)', 'Télétravail'],
   preferredContracts: ['CDI', 'CDD'],
-  blacklistedKeywords: ['alternance', 'stage', 'benevolat', 'commercial porte a porte'],
+  blacklistedKeywords: [
+    'alternance',
+    'alternant',
+    'alternante',
+    'apprentissage',
+    'apprenti',
+    'apprentie',
+    'contrat pro',
+    'stage',
+    'stagiaire',
+    'tutrice',
+    'tuteur',
+    'benevolat',
+  ],
   minimumScoreThreshold: 3.5,
+  cvFileName: 'CV_Alexandre_Dupont_Communication.pdf',
+  defaultCoverLetter: `Madame, Monsieur,\n\nVivement intéressé(e) par votre opportunité de {poste} au sein de {entreprise}, je vous adresse ma candidature avec un réel enthousiasme.\n\nFort(e) de mes compétences en {competences_cles}, j'ai développé une solide expertise dans le déploiement de stratégies de communication percutantes et la valorisation de marque. La vision et les ambitions de {entreprise} à {ville} correspondent parfaitement à mon projet professionnel.\n\nRigoureux(se), autonome et force de proposition, je serais ravi(e) de vous exposer mes motivations lors d'un prochain échange.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\n{nom}`,
+  defaultPitch: `Bonjour, je vous soumets ma candidature pour le poste de {poste} chez {entreprise}. Maîtrisant {competences_cles}, je suis disponible pour échanger sur vos objectifs et vous apporter mon savoir-faire à {ville}. Au plaisir d'un échange ! {nom} • {telephone}`,
+  customFiles: [
+    {
+      id: 'file-cv-1',
+      name: 'CV_Alexandre_Dupont_Communication.pdf',
+      type: 'cv',
+      size: '142 Ko',
+      dateAdded: '17 Octobre 2026',
+    },
+    {
+      id: 'file-lettre-1',
+      name: 'Lettre_Motivation_Type_2026.pdf',
+      type: 'cover_letter',
+      size: '98 Ko',
+      dateAdded: '17 Octobre 2026',
+    },
+  ],
 };
 
 /**

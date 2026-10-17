@@ -47,19 +47,44 @@ const {
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>9 plateformes connectées</span>
-          </div>
-          <a
-            href="https://github.com/career-ops-hq/career-ops"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition flex items-center gap-1.5"
+        {/* Onglets de navigation dans le header */}
+        <nav class="hidden md:flex items-center gap-1 bg-[#12161f] p-1 rounded-xl border border-[#242c3d]">
+          <button
+            type="button"
+            onclick="window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'search' }))"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
           >
-            <span>GitHub Career-Ops</span>
-          </a>
+            Recherche
+          </button>
+          <button
+            type="button"
+            onclick="window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'profile' }))"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Mon Profil & Documents</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+          </button>
+          <button
+            type="button"
+            onclick="window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'applications' }))"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+          >
+            Candidatures
+          </button>
+        </nav>
+
+        <div class="flex items-center gap-4">
+          <div class="hidden lg:flex items-center gap-2 text-xs text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>9 plateformes FR</span>
+          </div>
+          <button
+            type="button"
+            onclick="window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'profile' }))"
+            class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-sm shadow-blue-500/20"
+          >
+            <span>Mon Profil</span>
+          </button>
         </div>
       </div>
     </header>

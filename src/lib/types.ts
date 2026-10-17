@@ -53,8 +53,20 @@ export interface JobOffer {
   scoreBreakdown?: ScoreBreakdown;
 }
 
+export interface CandidateFile {
+  id: string;
+  name: string;
+  type: 'cv' | 'cover_letter' | 'portfolio' | 'diploma' | 'other';
+  size: string;
+  dateAdded: string;
+  content?: string;
+}
+
 export interface UserProfile {
   name: string;
+  email?: string;
+  phone?: string;
+  city?: string;
   title: string;
   summary: string;
   skills: string[];
@@ -64,6 +76,29 @@ export interface UserProfile {
   blacklistedKeywords: string[];
   minimumScoreThreshold: number; // e.g. 3.0
   cvRawText?: string;
+  cvFileName?: string;
+  defaultCoverLetter?: string;
+  defaultPitch?: string;
+  customFiles?: CandidateFile[];
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  company: string;
+  jobLocation: string;
+  jobUrl: string;
+  contractType: ContractType;
+  source: JobSourceId;
+  candidateName: string;
+  candidateEmail: string;
+  candidatePhone: string;
+  coverLetter: string;
+  pitch: string;
+  attachedFiles: string[];
+  status: 'draft' | 'ready' | 'submitted';
+  dateCreated: string;
 }
 
 export interface SearchFilterParams {
