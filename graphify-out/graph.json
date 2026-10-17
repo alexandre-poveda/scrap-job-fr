@@ -144,7 +144,7 @@
       "file_type": "code",
       "norm_label": "blacklistcheckresult",
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
-      "source_location": "L19"
+      "source_location": "L37"
     },
     {
       "id": "src_lib_types_scorebreakdown",
@@ -220,6 +220,30 @@
       "source_location": "L77"
     },
     {
+      "id": "src_lib_profile_profile_parser_parsepdfbuffer",
+      "label": "parsePdfBuffer()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "parsepdfbuffer()",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L77"
+    },
+    {
+      "id": "src_lib_profile_profile_parser_parseprofilefromtext",
+      "label": "parseProfileFromText()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "parseprofilefromtext()",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L36"
+    },
+    {
       "id": "src_lib_scrapers_local_search_executelocalsearch",
       "label": "executeLocalSearch()",
       "_callable": true,
@@ -242,6 +266,18 @@
       "norm_label": "resolvelocationdisplay()",
       "source_file": "src/lib/scrapers/local-search.ts",
       "source_location": "L12"
+    },
+    {
+      "id": "src_pages_api_parse_cv_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "src/pages/api/parse-cv.ts",
+      "source_location": "L4"
     },
     {
       "id": "src_pages_api_sources_get",
@@ -409,7 +445,7 @@
       "file_type": "code",
       "norm_label": "checkblacklist()",
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
-      "source_location": "L28"
+      "source_location": "L46"
     },
     {
       "id": "src_lib_career_ops_keyword_match_computekeywordcoverage",
@@ -448,6 +484,30 @@
       "source_location": "L8"
     },
     {
+      "id": "src_lib_career_ops_scoring_engine_computelocationfit",
+      "label": "computeLocationFit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "scoring-engine.ts",
+      "file_type": "code",
+      "norm_label": "computelocationfit()",
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_lib_career_ops_scoring_engine_computetitlefit",
+      "label": "computeTitleFit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "scoring-engine.ts",
+      "file_type": "code",
+      "norm_label": "computetitlefit()",
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L62"
+    },
+    {
       "id": "src_lib_career_ops_scoring_engine_evaluatejoboffer",
       "label": "evaluateJobOffer()",
       "_callable": true,
@@ -457,7 +517,7 @@
       "file_type": "code",
       "norm_label": "evaluatejoboffer()",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L14"
+      "source_location": "L88"
     },
     {
       "id": "src_lib_career_ops_scoring_engine_rankandfilterjoboffers",
@@ -469,7 +529,7 @@
       "file_type": "code",
       "norm_label": "rankandfilterjoboffers()",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L126"
+      "source_location": "L227"
     },
     {
       "id": "src_lib_career_ops_skill_extract_extractskills",
@@ -518,42 +578,6 @@
       "norm_label": "post()",
       "source_file": "src/pages/api/search.ts",
       "source_location": "L7"
-    },
-    {
-      "id": "src_lib_profile_profile_parser_parsepdfbuffer",
-      "label": "parsePdfBuffer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "code",
-      "norm_label": "parsepdfbuffer()",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L77"
-    },
-    {
-      "id": "src_lib_profile_profile_parser_parseprofilefromtext",
-      "label": "parseProfileFromText()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "code",
-      "norm_label": "parseprofilefromtext()",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "src_pages_api_parse_cv_post",
-      "label": "POST()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "code",
-      "norm_label": "post()",
-      "source_file": "src/pages/api/parse-cv.ts",
-      "source_location": "L4"
     },
     {
       "id": "src_components_profilemodal",
@@ -644,6 +668,17 @@
       "source_location": "L6"
     },
     {
+      "id": "src_lib_profile_profile_parser",
+      "label": "profile-parser.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "profile-parser.ts",
+      "source_file": "src/lib/profile/profile-parser.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_lib_profile_profile_parser_default_profile",
       "label": "DEFAULT_PROFILE",
       "_origin": "ast",
@@ -696,6 +731,17 @@
       "file_type": "code",
       "norm_label": "types.ts",
       "source_file": "src/lib/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_pages_api_parse_cv",
+      "label": "parse-cv.ts",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "parse-cv.ts",
+      "source_file": "src/pages/api/parse-cv.ts",
       "source_location": "L1"
     },
     {
@@ -752,6 +798,17 @@
       "norm_label": "react",
       "source_file": "package.json",
       "source_location": "L23"
+    },
+    {
+      "id": "ref_unpdf",
+      "label": "unpdf",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "types.ts",
+      "file_type": "concept",
+      "norm_label": "unpdf",
+      "source_file": "package.json",
+      "source_location": "L27"
     },
     {
       "id": "src_lib_scrapers_aggregator",
@@ -1005,6 +1062,83 @@
       "norm_label": "name",
       "source_file": "package.json",
       "source_location": "L2"
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "scripts",
+      "source_file": "package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "package_scripts_astro",
+      "label": "astro",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "astro",
+      "source_file": "package.json",
+      "source_location": "L11"
+    },
+    {
+      "id": "package_scripts_build",
+      "label": "build",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "build",
+      "source_file": "package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "package_scripts_dev",
+      "label": "dev",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "dev",
+      "source_file": "package.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "package_scripts_preview",
+      "label": "preview",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "preview",
+      "source_file": "package.json",
+      "source_location": "L10"
+    },
+    {
+      "id": "package_scripts_start",
+      "label": "start",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "start",
+      "source_file": "package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "package_scripts_test",
+      "label": "test",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "code",
+      "norm_label": "test",
+      "source_file": "package.json",
+      "source_location": "L12"
     },
     {
       "id": "package_type",
@@ -1752,118 +1886,9 @@
       "source_location": "L2"
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "scripts",
-      "source_file": "package.json",
-      "source_location": "L6"
-    },
-    {
-      "id": "package_scripts_astro",
-      "label": "astro",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "astro",
-      "source_file": "package.json",
-      "source_location": "L11"
-    },
-    {
-      "id": "package_scripts_build",
-      "label": "build",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "build",
-      "source_file": "package.json",
-      "source_location": "L9"
-    },
-    {
-      "id": "package_scripts_dev",
-      "label": "dev",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "dev",
-      "source_file": "package.json",
-      "source_location": "L7"
-    },
-    {
-      "id": "package_scripts_preview",
-      "label": "preview",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "preview",
-      "source_file": "package.json",
-      "source_location": "L10"
-    },
-    {
-      "id": "package_scripts_start",
-      "label": "start",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "start",
-      "source_file": "package.json",
-      "source_location": "L8"
-    },
-    {
-      "id": "package_scripts_test",
-      "label": "test",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "test",
-      "source_file": "package.json",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_lib_profile_profile_parser",
-      "label": "profile-parser.ts",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "code",
-      "norm_label": "profile-parser.ts",
-      "source_file": "src/lib/profile/profile-parser.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_pages_api_parse_cv",
-      "label": "parse-cv.ts",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "code",
-      "norm_label": "parse-cv.ts",
-      "source_file": "src/pages/api/parse-cv.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_unpdf",
-      "label": "unpdf",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "profile-parser.ts",
-      "file_type": "concept",
-      "norm_label": "unpdf",
-      "source_file": "package.json",
-      "source_location": "L27"
-    },
-    {
       "id": "src_styles_global",
       "label": "src_styles_global",
+      "_origin": "semantic",
       "community": 10,
       "community_name": "Layout.astro",
       "external": true,
@@ -1875,6 +1900,7 @@
     {
       "id": "ref_node_assert",
       "label": "ref_node_assert",
+      "_origin": "semantic",
       "community": 3,
       "community_name": "scoring-engine.ts",
       "external": true,
@@ -1886,6 +1912,7 @@
     {
       "id": "ref_node_test",
       "label": "ref_node_test",
+      "_origin": "semantic",
       "community": 3,
       "community_name": "scoring-engine.ts",
       "external": true,
@@ -1917,7 +1944,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L113",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -1929,7 +1956,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L151",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -1941,7 +1968,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L156",
+      "source_location": "L160",
       "weight": 1.0
     },
     {
@@ -1953,7 +1980,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L601",
+      "source_location": "L607",
       "weight": 1.0
     },
     {
@@ -1965,7 +1992,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L609",
+      "source_location": "L615",
       "weight": 1.0
     },
     {
@@ -1977,7 +2004,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
-      "source_location": "L41",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -2017,8 +2044,8 @@
       "weight": 1.0
     },
     {
-      "source": "src_lib_career_ops_scoring_engine_evaluatejoboffer",
-      "target": "src_lib_career_ops_blacklist_filter_checkblacklist",
+      "source": "src_lib_career_ops_scoring_engine_computelocationfit",
+      "target": "src_lib_career_ops_keyword_match_normalizetext",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -2026,6 +2053,18 @@
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
       "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_career_ops_scoring_engine_computetitlefit",
+      "target": "src_lib_career_ops_keyword_match_normalizetext",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -2037,7 +2076,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L33",
+      "source_location": "L107",
       "weight": 1.0
     },
     {
@@ -2049,7 +2088,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L36",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -2061,19 +2100,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L45",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
       "source": "src_lib_career_ops_scoring_engine_evaluatejoboffer",
-      "target": "src_lib_career_ops_keyword_match_normalizetext",
+      "target": "src_lib_career_ops_scoring_engine_computetitlefit",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L63",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_career_ops_scoring_engine_evaluatejoboffer",
+      "target": "src_lib_career_ops_scoring_engine_computelocationfit",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L152",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_career_ops_scoring_engine_evaluatejoboffer",
+      "target": "src_lib_career_ops_blacklist_filter_checkblacklist",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L90",
       "weight": 1.0
     },
     {
@@ -2085,7 +2148,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L128",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -2169,7 +2232,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/france-travail.ts",
-      "source_location": "L15",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -2181,7 +2244,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/france-travail.ts",
-      "source_location": "L32",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -2193,7 +2256,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/france-travail.ts",
-      "source_location": "L37",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -2361,7 +2424,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/lejobadequat.ts",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -2373,7 +2436,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/lejobadequat.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -2385,7 +2448,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L134",
+      "source_location": "L165",
       "weight": 1.0
     },
     {
@@ -2397,7 +2460,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L68",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -2409,7 +2472,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L72",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -2517,7 +2580,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/api/search.ts",
-      "source_location": "L30",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -2529,7 +2592,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/api/search.ts",
-      "source_location": "L37",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -5868,7 +5931,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
-      "source_location": "L19",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -5879,7 +5942,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/career-ops/blacklist-filter.ts",
-      "source_location": "L28",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -5928,13 +5991,35 @@
     },
     {
       "source": "src_lib_career_ops_scoring_engine",
+      "target": "src_lib_career_ops_scoring_engine_computelocationfit",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_career_ops_scoring_engine",
       "target": "src_lib_career_ops_scoring_engine_rankandfilterjoboffers",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L126",
+      "source_location": "L227",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_career_ops_scoring_engine",
+      "target": "src_lib_career_ops_scoring_engine_computetitlefit",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/career-ops/scoring-engine.ts",
+      "source_location": "L62",
       "weight": 1.0
     },
     {
@@ -5945,7 +6030,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/career-ops/scoring-engine.ts",
-      "source_location": "L14",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -6564,5 +6649,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "05b9c4a6261552804ff868c9271f539a828da6b9"
+  "built_at_commit": "058f3da0dca9d227bcfcf8990fe5f4251b77488b"
 }

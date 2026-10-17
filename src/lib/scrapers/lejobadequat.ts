@@ -17,7 +17,7 @@ export async function scrapeLeJobAdequat(params: SearchFilterParams): Promise<Jo
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
 
-      $('.offer, .offre-item, article').each((_, el) => {
+      $('.offer, .offre-item, [class*="card-offre"], [class*="job-item"]').each((_, el) => {
         const title = $(el).find('h2, h3, .title').text().trim();
         const company = $(el).find('.company').text().trim() || 'Groupe Adéquat';
         const loc = $(el).find('.location, .lieu').text().trim() || params.location || 'France';
@@ -25,14 +25,15 @@ export async function scrapeLeJobAdequat(params: SearchFilterParams): Promise<Jo
         const link = $(el).find('a').attr('href') || '';
         const desc = $(el).find('.description, p').text().trim() || `Offre Adéquat : ${title}.`;
 
-        if (title) {
+        const isArticle = /actualite|blog|minute|fournisseur officiel|gagner des places|arena/i.test(title);
+        if (title && !isArticle) {
           results.push(
             createJobOffer({
               id: `adequat-${Math.random().toString(36).substring(2, 9)}`,
               title,
               company,
               location: loc,
-              contractType: normalizeContractType(contractRaw),
+              contractType: normalizeContractType(`${contractRaw} ${title}`),
               source: 'lejobadequat',
               url: link.startsWith('http') ? link : `https://www.lejobadequat.com${link}`,
               description: desc,

@@ -36,8 +36,8 @@ export async function fetchWithTimeout(url: string, options: RequestInit = {}, t
  */
 export function normalizeContractType(raw: string): ContractType {
   const lower = (raw || '').toLowerCase();
-  if (lower.includes('alternance') || lower.includes('apprentissage')) return 'Alternance';
-  if (lower.includes('stage')) return 'Stage';
+  if (lower.includes('alternance') || lower.includes('apprentissage') || lower.includes('apprenti') || lower.includes('contrat pro')) return 'Alternance';
+  if (lower.includes('stage') || lower.includes('stagiaire') || lower.includes('tuteur') || lower.includes('tutrice')) return 'Stage';
   if (lower.includes('cdi')) return 'CDI';
   if (lower.includes('cdd')) return 'CDD';
   if (lower.includes('interim') || lower.includes('intérim') || lower.includes('temporaire')) return 'Interim';

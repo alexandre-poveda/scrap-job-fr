@@ -19,6 +19,12 @@ export const POST: APIRoute = async ({ request }) => {
     const userProfile: UserProfile = {
       ...DEFAULT_PROFILE,
       ...(body.profile || {}),
+      preferredLocations: body.location
+        ? Array.from(new Set([body.location, ...(body.profile?.preferredLocations || DEFAULT_PROFILE.preferredLocations)]))
+        : (body.profile?.preferredLocations || DEFAULT_PROFILE.preferredLocations),
+      preferredContracts: (body.contractTypes && body.contractTypes.length > 0)
+        ? body.contractTypes
+        : (body.profile?.preferredContracts || DEFAULT_PROFILE.preferredContracts),
       blacklistedKeywords: [
         ...(body.profile?.blacklistedKeywords || DEFAULT_PROFILE.blacklistedKeywords),
         ...(body.blacklistedKeywords || []),
@@ -35,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const evaluatedAll = rawJobs.map((job) => {
       const breakdown = evaluateJobOffer(job, userProfile);
-      if (breakdown.blacklistedFound.length > 0) {
+      if (breakdown.blacklistedFound.length > 0 || (breakdown.isExcluded && breakdown.score === 1.0)) {
         blacklistedCount++;
       } else if (breakdown.score < userProfile.minimumScoreThreshold) {
         belowThresholdCount++;

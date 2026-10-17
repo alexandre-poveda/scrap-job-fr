@@ -82,7 +82,11 @@ export const SearchDashboard: React.FC = () => {
     triggerSearch(newProfile);
   };
 
-  const triggerSearch = async (currentProfile = profile) => {
+  const triggerSearch = async (
+    currentProfile = profile,
+    currentMinScore = minScore,
+    currentContracts = selectedContracts
+  ) => {
     setIsLoading(true);
 
     try {
@@ -92,9 +96,9 @@ export const SearchDashboard: React.FC = () => {
         body: JSON.stringify({
           query,
           location,
-          contractTypes: selectedContracts,
+          contractTypes: currentContracts,
           sources: selectedSources,
-          minScore: minScore,
+          minScore: currentMinScore,
           profile: currentProfile,
         }),
       });
@@ -114,9 +118,9 @@ export const SearchDashboard: React.FC = () => {
         {
           query,
           location,
-          contractTypes: selectedContracts,
+          contractTypes: currentContracts,
           sources: selectedSources,
-          minScore: minScore,
+          minScore: currentMinScore,
         },
         currentProfile
       );
@@ -128,9 +132,9 @@ export const SearchDashboard: React.FC = () => {
         {
           query,
           location,
-          contractTypes: selectedContracts,
+          contractTypes: currentContracts,
           sources: selectedSources,
-          minScore: minScore,
+          minScore: currentMinScore,
         },
         currentProfile
       );
@@ -157,9 +161,11 @@ export const SearchDashboard: React.FC = () => {
   };
 
   const toggleContract = (c: ContractType) => {
-    setSelectedContracts((prev) =>
-      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
-    );
+    const updated = selectedContracts.includes(c)
+      ? selectedContracts.filter((x) => x !== c)
+      : [...selectedContracts, c];
+    setSelectedContracts(updated);
+    triggerSearch(profile, minScore, updated);
   };
 
   const toggleSource = (s: JobSourceId) => {
@@ -356,7 +362,7 @@ export const SearchDashboard: React.FC = () => {
                 key={score}
                 onClick={() => {
                   setMinScore(score);
-                  triggerSearch({ ...profile, minimumScoreThreshold: score });
+                  triggerSearch({ ...profile, minimumScoreThreshold: score }, score);
                 }}
                 className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition ${
                   minScore === score

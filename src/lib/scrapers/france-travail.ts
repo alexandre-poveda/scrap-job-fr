@@ -7,8 +7,13 @@ import type { JobOffer, SearchFilterParams } from '../types.ts';
 import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
 
 export async function scrapeFranceTravail(params: SearchFilterParams): Promise<JobOffer[]> {
+  const deptMatch = params.location?.match(/\b(\d{2})\b/);
+  const ftLocQuery = deptMatch
+    ? deptMatch[1]
+    : (params.location?.replace(/[()]/g, '').trim() || 'France');
+
   const query = encodeURIComponent(params.query || 'developpeur');
-  const location = encodeURIComponent(params.location || 'France');
+  const location = encodeURIComponent(ftLocQuery);
   const url = `https://candidat.francetravail.fr/offres/recherche?motsCles=${query}&lieux=${location}`;
 
   try {
@@ -34,7 +39,7 @@ export async function scrapeFranceTravail(params: SearchFilterParams): Promise<J
               title,
               company,
               location: loc,
-              contractType: normalizeContractType(rawContract),
+              contractType: normalizeContractType(`${rawContract} ${title} ${desc.slice(0, 100)}`),
               source: 'france_travail',
               url: link.startsWith('http') ? link : `https://candidat.francetravail.fr${link}`,
               description: desc,

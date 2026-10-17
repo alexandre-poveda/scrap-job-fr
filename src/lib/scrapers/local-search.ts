@@ -61,13 +61,17 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     ? params.sources
     : (Object.keys(JOB_SOURCES) as JobSourceId[]);
 
+  const candidateSkills = profile.skills && profile.skills.length > 0
+    ? profile.skills
+    : ['Communication digitale', 'Réseaux sociaux', 'Canva', 'Stratégie de communication', 'Gestion de projet'];
+
   const generatedOffers: JobOffer[] = [];
 
   sources.forEach((srcId, idx) => {
     const src = JOB_SOURCES[srcId];
     const loc = resolveLocationDisplay(location, idx);
 
-    // Offre 1 : Forte adéquation
+    // Offre 1 : Top Match (CDI, 3-4 compétences alignées, même ville)
     generatedOffers.push(
       createJobOffer({
         id: `${srcId}-${Date.now()}-${idx}-1`,
@@ -77,52 +81,79 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
         contractType: 'CDI',
         source: srcId,
         url: src.baseUrl,
-        description: `Nous recrutons un(e) ${query} en CDI pour notre site de ${loc}. Vous interviendrez sur la gestion de projets, la stratégie opérationnelle, la coordination des équipes et la relation partenaires. Compétences souhaitées : autonomie, esprit d'initiative, rigueur et compétences techniques associées à votre profil.`,
-        salary: '34k€ - 44k€ / an',
+        description: `Nous recrutons un(e) ${query} en CDI pour notre site de ${loc}. Vous interviendrez sur la ${candidateSkills[0] || 'Communication digitale'}, la ${candidateSkills[1] || 'Stratégie de communication'} et les ${candidateSkills[2] || 'Réseaux sociaux'}. Gestion de projet transverse, esprit d'initiative et rigueur.`,
+        salary: '36k€ - 44k€ / an',
         datePosted: "Aujourd'hui",
       })
     );
 
-    // Offre 2 : Variante CDD ou Intérim
-    const altContract = idx % 2 === 0 ? 'CDD' : 'Interim';
+    // Offre 2 : Forte adéquation (CDD ou CDI, 2 compétences alignées, même département)
+    const contract2 = idx % 2 === 0 ? 'CDD' : 'CDI';
     generatedOffers.push(
       createJobOffer({
         id: `${srcId}-${Date.now()}-${idx}-2`,
-        title: `${query} Confirmé(e) - Mission stratégique`,
-        company: `Groupe Régional ${loc.split(' ')[0]}`,
+        title: `${query} Confirmé(e) - Pôle Marque & Médias`,
+        company: `Groupe Médias Régional ${loc.split(' ')[0]}`,
         location: loc,
-        contractType: altContract,
+        contractType: contract2,
         source: srcId,
         url: src.baseUrl,
-        description: `Opportunité en ${altContract} pour un profil ${query}. Prise en charge des missions quotidiennes, déploiement d'outils modernes, suivi qualité et reporting régulier.`,
-        salary: altContract === 'Interim' ? '20€ - 24€ / heure' : '36k€ / an',
+        description: `Opportunité en ${contract2} pour un profil ${query}. Déploiement des actions de ${candidateSkills[0] || 'Communication digitale'} et maîtrise de ${candidateSkills[3] || 'Relations presse'}. Suivi des indicateurs de performance et coordination externe.`,
+        salary: '32k€ - 38k€ / an',
         datePosted: 'Il y a 2 jours',
       })
     );
 
-    // Offre 3 : Cas d'alternance ou stage (pour démontrer le filtrage strict des mots interdits !)
-    if (idx === 0 || idx === 3) {
+    // Offre 3 : Adéquation moyenne (Intérim ou CDD, 1 compétence, ville voisine)
+    generatedOffers.push(
+      createJobOffer({
+        id: `${srcId}-${Date.now()}-${idx}-3`,
+        title: `Assistant / Chargé de mission ${query}`,
+        company: `PME Innovante ${src.name}`,
+        location: loc,
+        contractType: idx % 2 === 0 ? 'Interim' : 'CDD',
+        source: srcId,
+        url: src.baseUrl,
+        description: `Mission temporaire pour assister l'équipe sur la création de supports graphiques et le suivi des plannings. Maîtrise requise : ${candidateSkills[4] || 'Gestion de projet'}.`,
+        salary: '22k€ - 28k€ / an',
+        datePosted: 'Il y a 4 jours',
+      })
+    );
+
+    // Offre 4 : Localisation éloignée (pour illustrer le filtrage sous seuil 3.5)
+    if (idx % 3 === 0) {
+      generatedOffers.push(
+        createJobOffer({
+          id: `${srcId}-${Date.now()}-${idx}-4`,
+          title: `Chargé de communication et événementiel`,
+          company: `Fédération Régionale Loire`,
+          location: 'Saint-Étienne (42)',
+          contractType: 'CDD',
+          source: srcId,
+          url: src.baseUrl,
+          description: `Poste sur site à Saint-Étienne sans télétravail. Organisation des salons et logistique événementielle.`,
+          datePosted: 'Il y a 5 jours',
+        })
+      );
+    }
+
+    // Offre 5 : Cas d'alternance ou stage avec tuteur (pour illustrer le rejet immédiat)
+    if (idx === 0 || idx === 2) {
       generatedOffers.push(
         createJobOffer({
           id: `${srcId}-alt-${idx}`,
-          title: `${query} en Alternance / Apprentissage`,
+          title: `${query} en Stage conventionné / Alternance`,
           company: `Agence ${src.name}`,
           location: loc,
-          contractType: 'Alternance',
+          contractType: 'Stage',
           source: srcId,
           url: src.baseUrl,
-          description: `Poste en contrat de professionnalisation ou contrat d'apprentissage pour la rentrée.`,
+          description: `Aux côtés de votre tuteur, stage ou contrat d'apprentissage de 6 mois pour étudiant en formation communication.`,
           datePosted: 'Récemment',
         })
       );
     }
   });
-
-  // Filtrer par types de contrat sélectionnés si spécifié
-  let filtered = generatedOffers;
-  if (params.contractTypes && params.contractTypes.length > 0) {
-    filtered = filtered.filter((j) => params.contractTypes!.includes(j.contractType));
-  }
 
   // Évaluation détaillée Career-Ops de chaque offre
   let blacklistedCount = 0;
@@ -130,13 +161,13 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
 
   const minScore = params.minScore !== undefined ? params.minScore : profile.minimumScoreThreshold;
 
-  const evaluatedAll = filtered.map((job) => {
+  const evaluatedAll = generatedOffers.map((job) => {
     const breakdown = evaluateJobOffer(job, {
       ...profile,
       minimumScoreThreshold: minScore,
     });
 
-    if (breakdown.blacklistedFound.length > 0) {
+    if (breakdown.blacklistedFound.length > 0 || breakdown.isExcluded && breakdown.score === 1.0) {
       blacklistedCount++;
     } else if (breakdown.score < minScore) {
       belowThresholdCount++;
@@ -149,9 +180,13 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     };
   });
 
-  const validJobs = evaluatedAll
-    .filter((j) => !j.scoreBreakdown?.isExcluded)
-    .sort((a, b) => (b.score || 0) - (a.score || 0));
+  // Filtrer par types de contrat sélectionnés si spécifié
+  let validJobs = evaluatedAll.filter((j) => !j.scoreBreakdown?.isExcluded);
+  if (params.contractTypes && params.contractTypes.length > 0) {
+    validJobs = validJobs.filter((j) => params.contractTypes!.includes(j.contractType));
+  }
+
+  validJobs.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return {
     jobs: validJobs,

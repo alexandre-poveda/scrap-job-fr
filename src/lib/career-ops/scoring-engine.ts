@@ -9,11 +9,85 @@ import { hasTerm, normalizeText } from './keyword-match.ts';
 import { extractSkills, foldFrenchAccents } from './skill-extract.ts';
 
 /**
+ * Calcule l'adéquation géographique entre l'offre et les préférences du candidat.
+ */
+export function computeLocationFit(jobLocation: string, preferredLocations: string[] = []): number {
+  if (!jobLocation) return 0.5;
+  const jNorm = normalizeText(jobLocation).toLowerCase();
+
+  // Si télétravail ou remote
+  if (jNorm.includes('teletravail') || jNorm.includes('remote')) return 1.0;
+
+  if (!preferredLocations || preferredLocations.length === 0) return 0.8;
+
+  // Extraire les numéros de département souhaités (ex: 13, 69, 75, etc.)
+  const prefDeptMatches: string[] = [];
+  for (const p of preferredLocations) {
+    const dept = p.match(/\b(\d{2})\b/);
+    if (dept) prefDeptMatches.push(dept[1]);
+  }
+
+  // Vérifier si le département de l'offre correspond
+  const jobDeptMatch = jNorm.match(/\b(\d{2})\b/);
+  if (jobDeptMatch && prefDeptMatches.includes(jobDeptMatch[1])) {
+    return 1.0;
+  }
+
+  // Correspondance textuelle ville / département
+  for (const pref of preferredLocations) {
+    const pNorm = normalizeText(pref).toLowerCase();
+    const pClean = pNorm.replace(/\(\d+\)/g, '').trim();
+    if (pClean.length > 2 && (jNorm.includes(pClean) || pNorm.includes(jNorm))) {
+      return 1.0;
+    }
+  }
+
+  // Même région (ex: Bouches-du-Rhône et PACA)
+  const isPacaPref = preferredLocations.some(p => p.toLowerCase().includes('13') || p.toLowerCase().includes('paca') || p.toLowerCase().includes('provence'));
+  const isPacaJob = jNorm.includes('13') || jNorm.includes('paca') || jNorm.includes('provence') || jNorm.includes('marseille') || jNorm.includes('aix');
+  if (isPacaPref && isPacaJob) {
+    return 0.9;
+  }
+
+  // France entière générique
+  if (jNorm === 'france' || jNorm === 'france / teletravail') return 0.7;
+
+  // Autre département éloigné
+  return 0.25;
+}
+
+/**
+ * Calcule l'adéquation de l'intitulé de poste.
+ */
+export function computeTitleFit(jobTitle: string, candidateTitle?: string): number {
+  if (!candidateTitle) return 0.7;
+  const cNorm = normalizeText(candidateTitle).toLowerCase();
+  const jNorm = normalizeText(jobTitle).toLowerCase();
+
+  if (jNorm.includes(cNorm)) return 1.0;
+
+  const stopWords = ['les', 'des', 'une', 'pour', 'dans', 'avec', 'sur', 'par', 'aux'];
+  const cWords = cNorm.split(/\s+/).filter(w => w.length > 2 && !stopWords.includes(w));
+  if (cWords.length === 0) return 0.7;
+
+  let matchedWords = 0;
+  for (const word of cWords) {
+    if (jNorm.includes(word)) matchedWords++;
+  }
+
+  const ratio = matchedWords / cWords.length;
+  if (ratio >= 1.0) return 0.95;
+  if (ratio >= 0.66) return 0.85;
+  if (ratio >= 0.33) return 0.65;
+  return 0.30;
+}
+
+/**
  * Évalue une offre d'emploi par rapport au profil utilisateur.
  */
 export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBreakdown {
-  // 1. Filtrage négatif (Mots interdits)
-  const blacklistResult = checkBlacklist(job.title, job.description, profile.blacklistedKeywords);
+  // 1. Filtrage négatif strict (Mots interdits & Types de contrat)
+  const blacklistResult = checkBlacklist(job.title, job.description, profile.blacklistedKeywords, job.contractType);
   if (blacklistResult.isExcluded) {
     return {
       score: 1.0,
@@ -27,12 +101,11 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
     };
   }
 
-  // 2. Extraction des compétences requises par l'offre
+  // 2. Compétences requises et alignement candidat
   const jobSkills = job.extractedSkills && job.extractedSkills.length > 0
     ? job.extractedSkills
     : extractSkills(`${job.title}\n${job.description}`);
 
-  // Normalisation des compétences du profil
   const userSkillsSet = new Set(profile.skills.map(s => foldFrenchAccents(s)));
   const cvTextFolded = foldFrenchAccents(profile.cvRawText || '');
 
@@ -41,7 +114,6 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
 
   for (const skill of jobSkills) {
     const sFolded = foldFrenchAccents(skill);
-    // Vérifier si la compétence est dans la liste du profil ou textuellement dans le CV
     if (userSkillsSet.has(sFolded) || (cvTextFolded && hasTerm(skill, cvTextFolded))) {
       matchedSkills.push(skill);
     } else {
@@ -49,63 +121,92 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
     }
   }
 
-  // 3. Calcul du score de compétences (base 1.0 à 5.0)
-  let skillsScore = 3.0; // score par défaut si l'offre ne liste aucune compétence spécifique
-  if (jobSkills.length > 0) {
-    const matchRatio = matchedSkills.length / jobSkills.length;
-    // Ratio 100% -> 5.0, 50% -> 3.0, 0% -> 1.5
-    skillsScore = 1.5 + (matchRatio * 3.5);
-  }
-
-  // 4. Alignement du titre du poste (bonus / malus)
-  let titleBonus = 0;
-  if (profile.title) {
-    const pTitleWords = normalizeText(profile.title).split(' ').filter(w => w.length > 3);
-    const jTitleNorm = normalizeText(job.title);
-    const titleMatches = pTitleWords.filter(w => jTitleNorm.includes(w));
-    if (titleMatches.length > 0) {
-      titleBonus += 0.4;
+  // Détection des compétences additionnelles du profil présentes dans le texte de l'offre
+  for (const userSkill of profile.skills) {
+    if (!matchedSkills.includes(userSkill)) {
+      if (hasTerm(userSkill, `${job.title}\n${job.description}`)) {
+        matchedSkills.push(userSkill);
+      }
     }
   }
 
-  // 5. Alignement du type de contrat
-  let contractBonus = 0;
+  // 3. Calculs des ratios dimensionnels (0.0 à 1.0)
+  // Dimension Compétences (40%)
+  let skillFit = 0.40;
+  if (matchedSkills.length >= 4) {
+    skillFit = 1.00;
+  } else if (matchedSkills.length === 3) {
+    skillFit = 0.88;
+  } else if (matchedSkills.length === 2) {
+    skillFit = 0.76;
+  } else if (matchedSkills.length === 1) {
+    skillFit = 0.60;
+  } else if (jobSkills.length === 0) {
+    skillFit = 0.50; // offre sans compétences listées
+  }
+
+  // Dimension Intitulé de poste (25%)
+  const titleFit = computeTitleFit(job.title, profile.title);
+
+  // Dimension Localisation géographique (20%)
+  const locationFit = computeLocationFit(job.location, profile.preferredLocations);
+
+  // Dimension Type de contrat (15%)
+  let contractFit = 0.5;
   if (profile.preferredContracts && profile.preferredContracts.length > 0) {
     if (profile.preferredContracts.includes(job.contractType)) {
-      contractBonus += 0.3;
-    } else if (job.contractType !== 'Autre') {
-      contractBonus -= 0.3;
+      contractFit = 1.0;
+    } else if (job.contractType === 'Autre') {
+      contractFit = 0.6;
+    } else {
+      contractFit = 0.25;
     }
   }
 
-  // 6. Score final borné entre 1.0 et 5.0, arrondi au dixième
-  let finalScore = skillsScore + titleBonus + contractBonus;
+  // 4. Score pondéré composite (Échelle 1.0 à 5.0)
+  const weightedScore = (skillFit * 0.40) + (titleFit * 0.25) + (locationFit * 0.20) + (contractFit * 0.15);
+  let finalScore = 1.0 + (weightedScore * 4.0);
   finalScore = Math.max(1.0, Math.min(5.0, Math.round(finalScore * 10) / 10));
 
-  // 7. Génération des motifs et points saillants (Career-Ops style)
+  // 5. Motifs détaillés (Career-Ops Fit Analysis)
   const reasons: string[] = [];
 
-  if (matchedSkills.length > 0) {
-    reasons.push(`${matchedSkills.length} compétence(s) alignée(s) : ${matchedSkills.slice(0, 4).join(', ')}${matchedSkills.length > 4 ? '...' : ''}`);
-  }
-  if (missingSkills.length > 0) {
-    reasons.push(`Lacunes détectées : ${missingSkills.slice(0, 3).join(', ')}${missingSkills.length > 3 ? '...' : ''}`);
-  }
-  if (job.contractType && profile.preferredContracts?.includes(job.contractType)) {
-    reasons.push(`Contrat ${job.contractType} conforme aux préférences`);
+  if (titleFit >= 0.85) {
+    reasons.push(`Poste "${job.title}" très aligné avec vos compétences cibles.`);
   }
 
+  if (matchedSkills.length > 0) {
+    reasons.push(`${matchedSkills.length} compétence(s) clé(s) identifiée(s) : ${matchedSkills.slice(0, 3).join(', ')}${matchedSkills.length > 3 ? '...' : ''}`);
+  }
+
+  if (locationFit >= 0.85) {
+    reasons.push(`Localisation idéale : ${job.location}`);
+  } else if (locationFit <= 0.4) {
+    reasons.push(`⚠️ Localisation éloignée de votre zone cible (${job.location})`);
+  }
+
+  if (contractFit >= 0.85) {
+    reasons.push(`Contrat ${job.contractType} conforme à vos critères`);
+  } else if (contractFit <= 0.3) {
+    reasons.push(`⚠️ Contrat ${job.contractType} non prioritaire`);
+  }
+
+  if (missingSkills.length > 0) {
+    reasons.push(`À approfondir : ${missingSkills.slice(0, 2).join(', ')}`);
+  }
+
+  // 6. Highlight synthétique
   let highlight = 'Bonne opportunité';
-  if (finalScore >= 4.5) {
-    highlight = '🎯 Correspondance exceptionnelle';
-  } else if (finalScore >= 4.0) {
+  if (finalScore >= 4.7) {
+    highlight = '🎯 Top Match Exceptionnel';
+  } else if (finalScore >= 4.2) {
     highlight = '⭐ Très forte adéquation';
-  } else if (finalScore >= 3.5) {
-    highlight = '👍 Profil compatible';
-  } else if (finalScore >= 2.5) {
-    highlight = '⚠️ Adéquation partielle';
+  } else if (finalScore >= 3.7) {
+    highlight = '👍 Opportunité compatible';
+  } else if (finalScore >= 3.2) {
+    highlight = '⚖️ Adéquation partielle';
   } else {
-    highlight = '❌ Faible adéquation';
+    highlight = '⚠️ Faible compatibilité';
   }
 
   return {
