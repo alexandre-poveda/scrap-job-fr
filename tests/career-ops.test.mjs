@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { extractSkills, foldFrenchAccents } from '../src/lib/career-ops/skill-extract.ts';
 import { checkBlacklist } from '../src/lib/career-ops/blacklist-filter.ts';
 import { evaluateJobOffer, rankAndFilterJobOffers } from '../src/lib/career-ops/scoring-engine.ts';
+import { parseProfileFromText } from '../src/lib/profile/profile-parser.ts';
 
 test('foldFrenchAccents normalizes accents correctly', () => {
   assert.strictEqual(foldFrenchAccents('Développeur Agilité Spécialisé'), 'developpeur agilite specialise');
@@ -125,5 +126,41 @@ test('offers with 100% skill coverage rank higher than offers with critical miss
   );
   assert.strictEqual(evalA.missingSkills.length, 0);
   assert.strictEqual(evalB.missingSkills.length, 3);
+});
+
+test('parseProfileFromText extracts school, degree, LinkedIn URL and skills from LinkedIn profile export', () => {
+  const sampleLinkedInText = `
+Alexandre Poveda
+Chargé de communication digitale & Marketing
+Marseille, Provence-Alpes-Côte d'Azur, France
+Contact : alexandre.poveda@email.fr | 06 12 34 56 78
+linkedin.com/in/alexandre-poveda
+
+Infos
+Passionné par la communication digitale, la création de contenus et les réseaux sociaux.
+
+Expérience
+Chargé de communication chez Entreprise Digitale
+2022 - Présent
+
+Formation
+Université d'Aix-Marseille
+Master Information et Communication Digitale
+2020 - 2022
+
+Compétences principales
+Communication digitale • Réseaux sociaux • Canva • Suite Adobe Creative • Gestion de projet
+`;
+
+  const parsed = parseProfileFromText(sampleLinkedInText, 'linkedin');
+
+  assert.strictEqual(parsed.name, 'Alexandre Poveda');
+  assert.strictEqual(parsed.title, 'Chargé de communication digitale & Marketing');
+  assert.strictEqual(parsed.schoolName, "Université d'Aix-Marseille");
+  assert.strictEqual(parsed.degreeTitle, 'Master Information et Communication Digitale');
+  assert.strictEqual(parsed.linkedinUrl, 'https://linkedin.com/in/alexandre-poveda');
+  assert.ok(parsed.skills?.includes('Communication digitale'));
+  assert.ok(parsed.skills?.includes('Réseaux sociaux / Community Management'));
+  assert.ok(parsed.skills?.includes('Canva'));
 });
 

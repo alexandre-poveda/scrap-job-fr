@@ -80,22 +80,154 @@ export const DEFAULT_PROFILE: UserProfile = {
 };
 
 /**
+ * Extrait les informations d'un profil LinkedIn (depuis export PDF ou copier-coller texte).
+ */
+export function extractLinkedInData(text: string): Partial<UserProfile> {
+  const result: Partial<UserProfile> = {};
+
+  // 1. Détection de l'URL LinkedIn
+  const linkedinMatch =
+    text.match(/https?:\/\/(?:[a-zA-Z0-9-]+\.)?linkedin\.com\/in\/[a-zA-Z0-9_\-\%]+/i) ||
+    text.match(/(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_\-\%]+/i);
+  if (linkedinMatch) {
+    const rawUrl = linkedinMatch[0];
+    result.linkedinUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
+  }
+
+  // 2. Détection email & téléphone
+  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) result.email = emailMatch[0];
+
+  const phoneMatch = text.match(/(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}/);
+  if (phoneMatch) result.phone = phoneMatch[0].replace(/\s+/g, ' ');
+
+  // 3. Détection de la Formation (École & Intitulé de diplôme)
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+
+  const cleanLine = (str: string) => str.replace(/\s*·?\s*\(?\d{4}.*$/, '').trim();
+
+  const degreeKeywords = [
+    'master', 'licence', 'bachelor', 'doctorat', 'bts', 'dut', 'mba', 'ingénieur', 'ingenieur',
+    'magistère', 'titre certifié', 'titre professionnel', 'rncp', 'bac \+\d', 'deug', 'diplôme', 'diplome',
+    "master's", "bachelor's", 'degree', 'phd', 'graduate'
+  ];
+
+  const schoolKeywords = [
+    'université', 'universite', 'university', 'école', 'ecole', 'school', 'institut', 'institute',
+    'lycée', 'lycee', 'business school', 'sciences po', 'polytechnique', 'iut', 'iae', 'efap', 'iscom',
+    'kedge', 'audencia', 'neoma', 'skema', 'epitech', 'supinfo', 'campus', 'faculté', 'faculte',
+    'essec', 'hec', 'edhec', 'college'
+  ];
+
+  const formationIdx = lines.findIndex((l) =>
+    /^(?:formation|formations|éducation|education|études|etudes)\b/i.test(l)
+  );
+
+  if (formationIdx !== -1) {
+    const end = Math.min(lines.length, formationIdx + 12);
+    for (let i = formationIdx + 1; i < end; i++) {
+      const line = lines[i];
+      const lower = line.toLowerCase();
+
+      if (/^(?:expérience|experience|compétences|competences|langues|certifications|projets)\b/i.test(line)) {
+        break;
+      }
+      if (/^\d{4}\s*[-–—]/i.test(line) || /^\d{4}$/.test(line)) continue;
+
+      if (!result.schoolName && schoolKeywords.some((k) => lower.includes(k))) {
+        result.schoolName = cleanLine(line);
+      } else if (!result.degreeTitle && degreeKeywords.some((k) => lower.includes(k))) {
+        result.degreeTitle = cleanLine(line);
+      } else if (!result.schoolName && line.length > 3 && line.length < 80) {
+        result.schoolName = cleanLine(line);
+      } else if (result.schoolName && !result.degreeTitle && line.length > 3 && line.length < 100) {
+        result.degreeTitle = cleanLine(line);
+      }
+    }
+  }
+
+  // Si non trouvé dans la section formation, scanner tout le texte
+  if (!result.schoolName || !result.degreeTitle) {
+    for (const line of lines) {
+      const lower = line.toLowerCase();
+      if (!result.schoolName && schoolKeywords.some((k) => lower.includes(k)) && line.length < 80) {
+        result.schoolName = cleanLine(line);
+      }
+      if (!result.degreeTitle && degreeKeywords.some((k) => lower.includes(k)) && line.length < 100) {
+        result.degreeTitle = cleanLine(line);
+      }
+    }
+  }
+
+  // 4. Détection du Titre et du Nom
+  if (lines.length > 0) {
+    if (lines[0].length < 40 && !lines[0].toLowerCase().includes('linkedin') && !lines[0].toLowerCase().includes('contact')) {
+      result.name = lines[0];
+    }
+    for (let i = 1; i < Math.min(lines.length, 6); i++) {
+      if (lines[i].length < 80 && !lines[i].includes('@') && !lines[i].includes('linkedin') && !lines[i].includes('http')) {
+        result.title = lines[i];
+        break;
+      }
+    }
+  }
+
+  // 5. Détection de la ville / zone
+  for (const line of lines.slice(0, 15)) {
+    if (/marseille|paris|lyon|bordeaux|toulouse|nantes|nice|strasbourg|lille|montpellier|rennes|aix|paca|bouches-du-rhône/i.test(line)) {
+      result.city = line;
+      break;
+    }
+  }
+
+  // 6. Section "Infos" ou "Résumé"
+  const summaryIdx = lines.findIndex((l) => /^(?:infos|résumé|resume|summary|à propos|a propos)\b/i.test(l));
+  if (summaryIdx !== -1 && lines[summaryIdx + 1]) {
+    const summaryLines: string[] = [];
+    for (let i = summaryIdx + 1; i < Math.min(lines.length, summaryIdx + 6); i++) {
+      if (/^(?:expérience|experience|formation|compétences|activités)\b/i.test(lines[i])) break;
+      summaryLines.push(lines[i]);
+    }
+    if (summaryLines.length > 0) {
+      result.summary = summaryLines.join(' ');
+    }
+  }
+
+  // 7. Compétences
+  result.skills = extractSkills(text);
+
+  return result;
+}
+
+/**
  * Extrait un profil utilisateur à partir d'un texte brut de CV ou d'export.
  */
 export function parseProfileFromText(rawText: string, sourceHint: 'cv' | 'linkedin' | 'france_travail' = 'cv'): Partial<UserProfile> {
   const extractedSkills = extractSkills(rawText);
 
-  // Détection basique du titre si présent en première ligne ou entête
-  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-  let inferredTitle = '';
-  let inferredName = '';
+  // Si c'est un profil LinkedIn ou que le texte contient du LinkedIn
+  if (sourceHint === 'linkedin' || rawText.includes('linkedin.com')) {
+    const linkedInData = extractLinkedInData(rawText);
+    return {
+      ...linkedInData,
+      cvRawText: rawText,
+    };
+  }
 
-  if (lines.length > 0) {
-    // Si la 1ère ligne est courte, souvent le nom
+  // Extraction standard pour CV et autres formats
+  const linkedInData = extractLinkedInData(rawText);
+  const lines = rawText.split('\n').map((l) => l.trim()).filter(Boolean);
+
+  let inferredTitle = linkedInData.title || '';
+  let inferredName = linkedInData.name || '';
+
+  if (lines.length > 0 && !inferredName) {
     if (lines[0].length < 40 && !lines[0].toLowerCase().includes('cv') && !lines[0].toLowerCase().includes('curriculum')) {
       inferredName = lines[0];
     }
-    // La 2ème ou 3ème ligne est souvent le titre du poste
+  }
+
+  if (!inferredTitle) {
     for (let i = 1; i < Math.min(lines.length, 6); i++) {
       if (lines[i].length < 60 && !lines[i].includes('@') && !lines[i].includes('http')) {
         inferredTitle = lines[i];
@@ -114,6 +246,13 @@ export function parseProfileFromText(rawText: string, sourceHint: 'cv' | 'linked
   return {
     name: inferredName || undefined,
     title: inferredTitle || undefined,
+    email: linkedInData.email,
+    phone: linkedInData.phone,
+    city: linkedInData.city,
+    schoolName: linkedInData.schoolName,
+    degreeTitle: linkedInData.degreeTitle,
+    linkedinUrl: linkedInData.linkedinUrl,
+    summary: linkedInData.summary,
     skills: extractedSkills,
     experienceYears,
     cvRawText: rawText,

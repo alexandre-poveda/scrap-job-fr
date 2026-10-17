@@ -25,6 +25,12 @@ import {
   Calendar,
   CheckSquare,
   MessageSquare,
+  Linkedin,
+  ExternalLink,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
 } from 'lucide-react';
 
 interface ProfileTabProps {
@@ -41,6 +47,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isPasteOpen, setIsPasteOpen] = useState(false);
   const [pastedText, setPastedText] = useState('');
+
+  // États pour la modal de connexion / synchronisation LinkedIn
+  const [isLinkedInModalOpen, setIsLinkedInModalOpen] = useState(false);
+  const [linkedInTab, setLinkedInTab] = useState<'pdf' | 'text'>('pdf');
+  const [linkedInUrlInput, setLinkedInUrlInput] = useState(profile.linkedinUrl || '');
+  const [linkedInTextInput, setLinkedInTextInput] = useState('');
+  const [isAnalyzingLinkedIn, setIsAnalyzingLinkedIn] = useState(false);
+  const [linkedInPreview, setLinkedInPreview] = useState<Partial<UserProfile> | null>(null);
+  const [linkedInFeedback, setLinkedInFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const insertTagInLetter = (tag: string) => {
     setFormData((prev) => ({
@@ -80,6 +95,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
           ...prev,
           name: parsed.name || prev.name,
           title: parsed.title || prev.title,
+          schoolName: parsed.schoolName || prev.schoolName,
+          degreeTitle: parsed.degreeTitle || prev.degreeTitle,
+          email: parsed.email || prev.email,
+          phone: parsed.phone || prev.phone,
+          city: parsed.city || prev.city,
+          linkedinUrl: parsed.linkedinUrl || prev.linkedinUrl,
           skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
           experienceYears: parsed.experienceYears || prev.experienceYears,
           cvRawText: text,
@@ -109,6 +130,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
             ...prev,
             name: parsed.name || prev.name,
             title: parsed.title || prev.title,
+            schoolName: parsed.schoolName || prev.schoolName,
+            degreeTitle: parsed.degreeTitle || prev.degreeTitle,
+            email: parsed.email || prev.email,
+            phone: parsed.phone || prev.phone,
+            city: parsed.city || prev.city,
+            linkedinUrl: parsed.linkedinUrl || prev.linkedinUrl,
             skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
             experienceYears: parsed.experienceYears || prev.experienceYears,
             cvRawText: parsed.cvRawText || prev.cvRawText,
@@ -143,6 +170,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
         ...prev,
         name: parsed.name || prev.name,
         title: parsed.title || prev.title,
+        schoolName: parsed.schoolName || prev.schoolName,
+        degreeTitle: parsed.degreeTitle || prev.degreeTitle,
+        email: parsed.email || prev.email,
+        phone: parsed.phone || prev.phone,
+        city: parsed.city || prev.city,
+        linkedinUrl: parsed.linkedinUrl || prev.linkedinUrl,
         skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
         experienceYears: parsed.experienceYears || prev.experienceYears,
         cvRawText: pastedText,
@@ -155,6 +188,114 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Traitement de l'import PDF officiel LinkedIn
+  const handleLinkedInPdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsAnalyzingLinkedIn(true);
+    setLinkedInFeedback(null);
+    setLinkedInPreview(null);
+
+    try {
+      const data = new FormData();
+      data.append('file', file);
+      data.append('type', 'linkedin');
+
+      const res = await fetch('/api/parse-cv', {
+        method: 'POST',
+        body: data,
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success && json.profile) {
+        setLinkedInPreview(json.profile);
+        setLinkedInFeedback({
+          type: 'success',
+          message: 'Profil officiel LinkedIn analysé avec succès ! Vérifiez les informations ci-dessous puis validez la synchronisation.',
+        });
+      } else {
+        setLinkedInFeedback({
+          type: 'error',
+          message: json.error || 'Impossible de lire le document. Assurez-vous d\'exporter le PDF officiel depuis votre profil LinkedIn.',
+        });
+      }
+    } catch (err: any) {
+      setLinkedInFeedback({
+        type: 'error',
+        message: `Erreur de communication : ${err.message}`,
+      });
+    } finally {
+      setIsAnalyzingLinkedIn(false);
+    }
+  };
+
+  // Traitement de la synchronisation LinkedIn par texte ou URL
+  const handleLinkedInTextAnalyze = () => {
+    if (!linkedInTextInput.trim() && !linkedInUrlInput.trim()) return;
+
+    setIsAnalyzingLinkedIn(true);
+    setLinkedInFeedback(null);
+    setLinkedInPreview(null);
+
+    try {
+      const combinedText = `${linkedInUrlInput}\n${linkedInTextInput}`;
+      const parsed = parseProfileFromText(combinedText, 'linkedin');
+      if (linkedInUrlInput.trim() && !parsed.linkedinUrl) {
+        parsed.linkedinUrl = linkedInUrlInput.trim();
+      }
+      setLinkedInPreview(parsed);
+      setLinkedInFeedback({
+        type: 'success',
+        message: 'Informations de profil détectées ! Vérifiez les données ci-dessous puis confirmez.',
+      });
+    } catch (err: any) {
+      setLinkedInFeedback({
+        type: 'error',
+        message: `Erreur d'analyse : ${err.message}`,
+      });
+    } finally {
+      setIsAnalyzingLinkedIn(false);
+    }
+  };
+
+  // Confirmation et application des données LinkedIn au profil
+  const handleApplyLinkedInData = () => {
+    if (!linkedInPreview) return;
+
+    setFormData((prev) => {
+      const updatedSkills = Array.from(new Set([...prev.skills, ...(linkedInPreview.skills || [])]));
+      const newFileMeta: CandidateFile = {
+        id: `file-linkedin-${Date.now()}`,
+        name: `Export_LinkedIn_${(linkedInPreview.name || 'Profil').replace(/\s+/g, '_')}.pdf`,
+        type: 'cv',
+        size: 'Profil LinkedIn',
+        dateAdded: new Date().toLocaleDateString('fr-FR'),
+      };
+
+      return {
+        ...prev,
+        name: linkedInPreview.name || prev.name,
+        title: linkedInPreview.title || prev.title,
+        schoolName: linkedInPreview.schoolName || prev.schoolName,
+        degreeTitle: linkedInPreview.degreeTitle || prev.degreeTitle,
+        linkedinUrl: linkedInPreview.linkedinUrl || prev.linkedinUrl || linkedInUrlInput,
+        email: linkedInPreview.email || prev.email,
+        phone: linkedInPreview.phone || prev.phone,
+        city: linkedInPreview.city || prev.city,
+        summary: linkedInPreview.summary || prev.summary,
+        skills: updatedSkills,
+        customFiles: prev.customFiles ? [newFileMeta, ...prev.customFiles] : [newFileMeta],
+      };
+    });
+
+    setIsLinkedInModalOpen(false);
+    setUploadMessage(
+      `🎉 Profil LinkedIn synchronisé avec succès ! École : "${linkedInPreview.schoolName || 'Enregistrée'}", Diplôme : "${linkedInPreview.degreeTitle || 'Enregistré'}", ${linkedInPreview.skills?.length || 0} compétences ajoutées.`
+    );
+    setLinkedInPreview(null);
   };
 
   const addSkill = () => {
@@ -222,20 +363,101 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
             {formData.name.charAt(0) || 'U'}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">{formData.name}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-white tracking-tight">{formData.name}</h2>
+              {formData.linkedinUrl && (
+                <span className="px-2 py-0.5 text-[10px] bg-[#0A66C2]/20 text-sky-300 border border-[#0A66C2]/40 rounded-full font-semibold flex items-center gap-1">
+                  <Linkedin className="w-2.5 h-2.5 fill-current" /> LinkedIn
+                </span>
+              )}
+            </div>
             <p className="text-xs text-blue-400 font-medium">{formData.title}</p>
             <p className="text-[11px] text-slate-400 mt-0.5">
+              {formData.schoolName ? (
+                <span>🎓 <strong className="text-slate-300">{formData.schoolName}</strong> {formData.degreeTitle ? `(${formData.degreeTitle})` : ''} • </span>
+              ) : null}
               {formData.skills.length} compétences • {formData.customFiles?.length || 1} fichier(s) • Seuil : {formData.minimumScoreThreshold}/5
             </p>
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setIsLinkedInModalOpen(true);
+              setLinkedInPreview(null);
+              setLinkedInFeedback(null);
+            }}
+            className="px-4 py-2.5 bg-[#0A66C2] hover:bg-[#004182] text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer"
+          >
+            <Linkedin className="w-4 h-4 fill-current" />
+            <span>{formData.linkedinUrl ? 'LinkedIn Connecté' : 'Connecter LinkedIn'}</span>
+          </button>
+
+          <button
+            onClick={handleSave}
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center gap-2 cursor-pointer"
+          >
+            {saveSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Sparkles className="w-4 h-4" />}
+            <span>{saveSuccess ? 'Enregistré avec succès !' : 'Enregistrer mon profil'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Carte Dédiée : Accélérateur de Profil & Synchronisation LinkedIn */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-[#004182]/30 via-[#0A66C2]/15 to-slate-900 border border-[#0A66C2]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-start gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#0A66C2] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[#0A66C2]/30">
+            <Linkedin className="w-6 h-6 fill-current" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white">Connexion & Synchronisation LinkedIn</h3>
+              {formData.linkedinUrl ? (
+                <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Connecté
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full font-semibold">
+                  Accélérateur de profil
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-300 mt-1">
+              {formData.schoolName ? (
+                <span>
+                  🎓 École : <strong className="text-white">{formData.schoolName}</strong>
+                  {formData.degreeTitle && <> • Diplôme : <strong className="text-white">{formData.degreeTitle}</strong></>}
+                  {formData.linkedinUrl && (
+                    <a
+                      href={formData.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 hover:underline font-medium"
+                    >
+                      Voir profil <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </span>
+              ) : (
+                'Récupérez automatiquement votre école, intitulé exact de formation, compétences et coordonnées depuis LinkedIn pour accélérer et pré-remplir vos candidatures.'
+              )}
+            </p>
+          </div>
+        </div>
+
         <button
-          onClick={handleSave}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center gap-2"
+          type="button"
+          onClick={() => {
+            setIsLinkedInModalOpen(true);
+            setLinkedInPreview(null);
+            setLinkedInFeedback(null);
+          }}
+          className="px-4 py-2.5 bg-[#0A66C2] hover:bg-[#004182] text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center gap-2 shrink-0 cursor-pointer"
         >
-          {saveSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : <Sparkles className="w-4 h-4" />}
-          <span>{saveSuccess ? 'Enregistré avec succès !' : 'Enregistrer mon profil'}</span>
+          <Linkedin className="w-4 h-4 fill-current" />
+          <span>{formData.linkedinUrl ? 'Re-synchroniser LinkedIn' : 'Connecter mon LinkedIn'}</span>
         </button>
       </div>
 
@@ -849,6 +1071,283 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
           </div>
         </div>
       </div>
+
+      {/* Modal de Connexion / Synchronisation LinkedIn */}
+      {isLinkedInModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-[#0e131d] border border-[#242c3d] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header Modal */}
+            <div className="p-5 border-b border-[#242c3d] bg-[#121723] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#0A66C2] flex items-center justify-center text-white shadow-md shadow-[#0A66C2]/30">
+                  <Linkedin className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Connecter & Synchroniser LinkedIn</h3>
+                  <p className="text-[11px] text-slate-400">
+                    Importez votre école, diplôme, compétences et infos de contact en quelques secondes
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsLinkedInModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Onglets Méthode */}
+            <div className="flex border-b border-[#242c3d] bg-slate-900/60 p-1.5 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setLinkedInTab('pdf');
+                  setLinkedInFeedback(null);
+                }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-2 ${
+                  linkedInTab === 'pdf'
+                    ? 'bg-[#0A66C2] text-white shadow'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Export PDF Officiel LinkedIn (Recommandé)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setLinkedInTab('text');
+                  setLinkedInFeedback(null);
+                }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition flex items-center justify-center gap-2 ${
+                  linkedInTab === 'text'
+                    ? 'bg-[#0A66C2] text-white shadow'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <Link2 className="w-3.5 h-3.5" />
+                <span>URL & Copier-Coller Direct</span>
+              </button>
+            </div>
+
+            {/* Corps Modal */}
+            <div className="p-6 overflow-y-auto space-y-5">
+              {linkedInTab === 'pdf' ? (
+                <div className="space-y-4">
+                  {/* Guide étape par étape */}
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/20 space-y-2.5">
+                    <h4 className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Comment obtenir votre export PDF officiel en 2 clics sur LinkedIn :</span>
+                    </h4>
+                    <ol className="text-xs text-slate-300 space-y-1.5 list-decimal list-inside pl-1">
+                      <li>
+                        Rendez-vous sur votre profil LinkedIn :{' '}
+                        <a
+                          href="https://www.linkedin.com/in/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sky-400 hover:underline inline-flex items-center gap-1"
+                        >
+                          linkedin.com <ExternalLink className="w-3 h-3 inline" />
+                        </a>
+                      </li>
+                      <li>
+                        Cliquez sur le bouton <strong className="text-white">"Plus"</strong> (ou les trois points <code className="text-sky-300">...</code> sous votre photo de profil)
+                      </li>
+                      <li>
+                        Sélectionnez <strong className="text-white">"Enregistrer au format PDF"</strong>
+                      </li>
+                      <li>
+                        Déposez le fichier PDF téléchargé ci-dessous :
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Dropzone d'importation PDF */}
+                  <div className="p-6 rounded-2xl border-2 border-dashed border-[#0A66C2]/50 hover:border-[#0A66C2] bg-slate-950/60 text-center transition flex flex-col items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#0A66C2]/20 flex items-center justify-center text-blue-400">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-white">
+                        Glissez-déposez votre export PDF LinkedIn ici
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Fichier PDF officiel généré par LinkedIn (avec votre parcours, formation et compétences)
+                      </p>
+                    </div>
+
+                    <label className="cursor-pointer px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-2">
+                      <FilePlus className="w-4 h-4" />
+                      <span>{isAnalyzingLinkedIn ? 'Analyse du profil en cours...' : 'Sélectionner le fichier PDF'}</span>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        onChange={handleLinkedInPdfUpload}
+                        disabled={isAnalyzingLinkedIn}
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center gap-1.5">
+                      <Link2 className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Lien de votre profil LinkedIn</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={linkedInUrlInput}
+                      onChange={(e) => setLinkedInUrlInput(e.target.value)}
+                      placeholder="https://www.linkedin.com/in/votre-nom"
+                      className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Texte de vos sections Formation & Infos LinkedIn</span>
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={linkedInTextInput}
+                      onChange={(e) => setLinkedInTextInput(e.target.value)}
+                      placeholder="Copiez et collez ici le texte de votre profil LinkedIn (ex: nom de votre école, intitulé du diplôme, vos compétences ou votre résumé)..."
+                      className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleLinkedInTextAnalyze}
+                      disabled={isAnalyzingLinkedIn || (!linkedInTextInput.trim() && !linkedInUrlInput.trim())}
+                      className="px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isAnalyzingLinkedIn ? 'Analyse en cours...' : '⚡ Analyser et détecter les informations'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Message de feedback */}
+              {linkedInFeedback && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs flex items-start gap-2.5 ${
+                    linkedInFeedback.type === 'success'
+                      ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300'
+                      : 'bg-red-950/40 border border-red-500/40 text-red-300'
+                  }`}
+                >
+                  {linkedInFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  )}
+                  <span>{linkedInFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Aperçu des données détectées */}
+              {linkedInPreview && (
+                <div className="p-4 rounded-xl bg-slate-900 border border-blue-500/30 space-y-3">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Informations LinkedIn détectées avec succès :</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">École / Université</span>
+                      <span className="font-semibold text-white">
+                        {linkedInPreview.schoolName || <span className="text-amber-400 font-normal">Non détectée</span>}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Intitulé du diplôme</span>
+                      <span className="font-semibold text-white">
+                        {linkedInPreview.degreeTitle || <span className="text-amber-400 font-normal">Non détecté</span>}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Candidat & Titre</span>
+                      <span className="font-semibold text-white">
+                        {linkedInPreview.name || formData.name} • {linkedInPreview.title || formData.title}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Profil LinkedIn</span>
+                      <span className="font-semibold text-sky-400 truncate block">
+                        {linkedInPreview.linkedinUrl || linkedInUrlInput || '—'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {linkedInPreview.skills && linkedInPreview.skills.length > 0 && (
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1.5">
+                        {linkedInPreview.skills.length} Compétence(s) extraite(s) :
+                      </span>
+                      <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1.5 bg-slate-950/50 rounded-lg border border-slate-800">
+                        {linkedInPreview.skills.map((s) => (
+                          <span
+                            key={s}
+                            className="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-300 rounded border border-blue-500/30"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 flex justify-end gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setLinkedInPreview(null)}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition"
+                    >
+                      Réinitialiser
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyLinkedInData}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>Valider et enregistrer sur mon profil</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Modal */}
+            <div className="p-4 border-t border-[#242c3d] bg-[#121723] flex items-center justify-between text-xs text-slate-400">
+              <span>Astuce : Vous pouvez également modifier manuellement chaque champ dans le formulaire ci-dessous.</span>
+              <button
+                type="button"
+                onClick={() => setIsLinkedInModalOpen(false)}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg transition"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
