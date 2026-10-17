@@ -132,17 +132,25 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
 
   // 3. Calculs des ratios dimensionnels (0.0 à 1.0)
   // Dimension Compétences (40%)
-  let skillFit = 0.40;
-  if (matchedSkills.length >= 4) {
-    skillFit = 1.00;
-  } else if (matchedSkills.length === 3) {
-    skillFit = 0.88;
-  } else if (matchedSkills.length === 2) {
-    skillFit = 0.76;
-  } else if (matchedSkills.length === 1) {
-    skillFit = 0.60;
-  } else if (jobSkills.length === 0) {
-    skillFit = 0.50; // offre sans compétences listées
+  const totalRelevantSkills = matchedSkills.length + missingSkills.length;
+  let skillFit = 0.50;
+
+  if (totalRelevantSkills > 0) {
+    // Ratio de couverture des compétences requises par l'offre (0.0 à 1.0)
+    const matchRatio = matchedSkills.length / totalRelevantSkills;
+
+    // Bonus de volume de compétences maîtrisées (+0.05 par compétence alignée, max +0.20)
+    const volumeBonus = Math.min(0.20, matchedSkills.length * 0.05);
+
+    // Pénalité par compétence manquante requise par l'offre (-0.08 par compétence manquante)
+    const missingPenalty = Math.min(0.40, missingSkills.length * 0.08);
+
+    // Score compétences : la couverture prédomine, bonifiée par le volume et pénalisée par les manques
+    skillFit = (matchRatio * 0.85) + volumeBonus - missingPenalty;
+    skillFit = Math.max(0.15, Math.min(1.0, skillFit));
+  } else {
+    // Offre sans compétences techniques formellement isolées
+    skillFit = matchedSkills.length > 0 ? 0.75 : 0.55;
   }
 
   // Dimension Intitulé de poste (25%)
@@ -175,8 +183,14 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
     reasons.push(`Poste "${job.title}" très aligné avec vos compétences cibles.`);
   }
 
-  if (matchedSkills.length > 0) {
-    reasons.push(`${matchedSkills.length} compétence(s) clé(s) identifiée(s) : ${matchedSkills.slice(0, 3).join(', ')}${matchedSkills.length > 3 ? '...' : ''}`);
+  if (totalRelevantSkills > 0 && missingSkills.length === 0) {
+    reasons.push(`🎯 100% des compétences demandées sont validées (${matchedSkills.length}/${totalRelevantSkills}, 0 manquante).`);
+  } else if (matchedSkills.length > 0) {
+    reasons.push(`${matchedSkills.length} compétence(s) alignée(s) : ${matchedSkills.slice(0, 3).join(', ')}${matchedSkills.length > 3 ? '...' : ''}`);
+  }
+
+  if (missingSkills.length > 0) {
+    reasons.push(`⚠️ ${missingSkills.length} compétence(s) manquante(s) : ${missingSkills.slice(0, 3).join(', ')} (pénalité appliquée sur le score).`);
   }
 
   if (locationFit >= 0.85) {
@@ -189,10 +203,6 @@ export function evaluateJobOffer(job: JobOffer, profile: UserProfile): ScoreBrea
     reasons.push(`Contrat ${job.contractType} conforme à vos critères`);
   } else if (contractFit <= 0.3) {
     reasons.push(`⚠️ Contrat ${job.contractType} non prioritaire`);
-  }
-
-  if (missingSkills.length > 0) {
-    reasons.push(`À approfondir : ${missingSkills.slice(0, 2).join(', ')}`);
   }
 
   // 6. Highlight synthétique

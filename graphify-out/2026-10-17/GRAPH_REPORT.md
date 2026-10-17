@@ -1,17 +1,17 @@
 # Graph Report - focused-davinci  (2026-10-17)
 
 ## Corpus Check
-- 36 files · ~15,026 words
+- 39 files · ~19,967 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 1, .css 1, .toml 1)
 
 ## Summary
-- 167 nodes · 401 edges · 9 communities (8 shown, 1 thin omitted)
+- 177 nodes · 442 edges · 10 communities (9 shown, 1 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 9 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `058f3da0`
+- Built from commit: `959ab786`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -24,40 +24,41 @@
 - 🇫🇷 CareerOps France — AI Job Search & Matching Web App
 - Spécification Technique & Fonctionnelle : CareerOps France (Astro Web App)
 - compilerOptions
+- local-search.ts
 - Layout.astro
 
 ## God Nodes (most connected - your core abstractions)
 1. `createJobOffer()` - 22 edges
-2. `fetchWithTimeout()` - 19 edges
-3. `normalizeContractType()` - 19 edges
-4. `JobOffer` - 18 edges
+2. `JobOffer` - 21 edges
+3. `fetchWithTimeout()` - 19 edges
+4. `normalizeContractType()` - 19 edges
 5. `evaluateJobOffer()` - 13 edges
-6. `SearchFilterParams` - 13 edges
-7. `cheerio` - 10 edges
-8. `extractSkills()` - 9 edges
-9. `UserProfile` - 8 edges
-10. `scripts` - 7 edges
+6. `UserProfile` - 13 edges
+7. `SearchFilterParams` - 13 edges
+8. `cheerio` - 10 edges
+9. `SearchDashboard()` - 9 edges
+10. `extractSkills()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ScoreDetailModalProps` --references--> `JobOffer`  [EXTRACTED]
   src/components/ScoreDetailModal.tsx → src/lib/types.ts
+- `ApplicationModalProps` --references--> `JobOffer`  [EXTRACTED]
+  src/components/ApplicationModal.tsx → src/lib/types.ts
 - `ProfileModalProps` --references--> `UserProfile`  [EXTRACTED]
   src/components/ProfileModal.tsx → src/lib/types.ts
-- `executeLocalSearch()` --calls--> `evaluateJobOffer()`  [EXTRACTED]
-  src/lib/scrapers/local-search.ts → src/lib/career-ops/scoring-engine.ts
-- `parseProfileFromText()` --calls--> `extractSkills()`  [EXTRACTED]
-  src/lib/profile/profile-parser.ts → src/lib/career-ops/skill-extract.ts
-- `createJobOffer()` --calls--> `extractSkills()`  [EXTRACTED]
-  src/lib/scrapers/base.ts → src/lib/career-ops/skill-extract.ts
+- `ProfileTabProps` --references--> `UserProfile`  [EXTRACTED]
+  src/components/ProfileTab.tsx → src/lib/types.ts
+- `SearchDashboard()` --calls--> `executeLocalSearch()`  [EXTRACTED]
+  src/components/SearchDashboard.tsx → src/lib/scrapers/local-search.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (9 total, 1 thin omitted)
+## Communities (10 total, 1 thin omitted)
 
 ### Community 0 - "types.ts"
-Cohesion: 0.12
-Nodes (25): lucide-react, react, unpdf, ProfileModal(), ProfileModalProps, ScoreDetailModal(), ScoreDetailModalProps, CONTRACT_TYPES (+17 more)
+Cohesion: 0.14
+Nodes (26): lucide-react, react, ApplicationModal(), ApplicationModalProps, ProfileModal(), ProfileModalProps, ProfileTab(), ProfileTabProps (+18 more)
 
 ### Community 1 - "aggregator.ts"
 Cohesion: 0.33
@@ -65,11 +66,11 @@ Nodes (17): cheerio, ScraperFunction, createJobOffer(), fetchWithTimeout(), norm
 
 ### Community 2 - "package.json"
 Cohesion: 0.07
-Nodes (29): description, devDependencies, @types/node, @types/react, @types/react-dom, typescript, name, scripts (+21 more)
+Nodes (30): description, devDependencies, @types/node, @types/react, @types/react-dom, typescript, name, scripts (+22 more)
 
 ### Community 3 - "scoring-engine.ts"
-Cohesion: 0.19
-Nodes (17): BlacklistCheckResult, checkBlacklist(), DEFAULT_BLACKLISTED_KEYWORDS, computeKeywordCoverage(), hasTerm(), normalizeText(), computeLocationFit(), computeTitleFit() (+9 more)
+Cohesion: 0.24
+Nodes (16): BlacklistCheckResult, checkBlacklist(), DEFAULT_BLACKLISTED_KEYWORDS, computeKeywordCoverage(), hasTerm(), normalizeText(), computeLocationFit(), computeTitleFit() (+8 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.14
@@ -87,6 +88,10 @@ Nodes (8): 1. Objectif & Vision, 2. Capability Map (Carte des capacités), 3. Ar
 Cohesion: 0.25
 Nodes (7): astro/tsconfigs/strict, compilerOptions, baseUrl, jsx, jsxImportSource, paths, extends
 
+### Community 8 - "local-search.ts"
+Cohesion: 0.22
+Nodes (6): SCRAPERS_MAP, executeLocalSearch(), resolveLocationDisplay(), JOB_SOURCES, JobSourceId, JobSourceInfo
+
 ## Knowledge Gaps
 - **64 isolated node(s):** `name`, `type`, `version`, `description`, `dev` (+59 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 68 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
@@ -96,16 +101,16 @@ Nodes (7): astro/tsconfigs/strict, compilerOptions, baseUrl, jsx, jsxImportSourc
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.125) - this node is a cross-community bridge._
+  _High betweenness centrality (0.120) - this node is a cross-community bridge._
 - **What connects `name`, `type`, `version` to the rest of the system?**
   _64 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `types.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.12091038406827881 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1379800853485064 - nodes in this community are weakly interconnected._
 - **Why does `cheerio` connect `aggregator.ts` to `package.json`?**
-  _High betweenness centrality (0.095) - this node is a cross-community bridge._
-- **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.07096774193548387 - nodes in this community are weakly interconnected._
-- **Why does `astro` connect `package.json` to `types.ts`, `scoring-engine.ts`?**
   _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Should `package.json` be split into smaller, more focused modules?**
+  _Cohesion score 0.06854838709677419 - nodes in this community are weakly interconnected._
+- **Why does `astro` connect `package.json` to `types.ts`, `local-search.ts`, `scoring-engine.ts`?**
+  _High betweenness centrality (0.074) - this node is a cross-community bridge._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._

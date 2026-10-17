@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import type { JobOffer, UserProfile, JobApplication } from '../lib/types.ts';
-import { generateTailoredCoverLetter } from '../lib/career-ops/application-helper.ts';
+import type { JobOffer, UserProfile, JobApplication, RecruiterFormAnswer } from '../lib/types.ts';
+import { generateTailoredCoverLetter, generateRecruiterFormAnswers } from '../lib/career-ops/application-helper.ts';
 import {
   X,
   Sparkles,
@@ -16,6 +16,14 @@ import {
   MapPin,
   Send,
   Save,
+  CheckSquare,
+  HelpCircle,
+  MessageSquare,
+  GraduationCap,
+  Share2,
+  Link2,
+  Calendar,
+  ClipboardList,
 } from 'lucide-react';
 
 interface ApplicationModalProps {
@@ -35,6 +43,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
 }) => {
   if (!isOpen || !job) return null;
 
+  const [modalTab, setModalTab] = useState<'letter' | 'questions'>('letter');
   const [candidateName, setCandidateName] = useState(profile.name);
   const [candidateEmail, setCandidateEmail] = useState(profile.email || '');
   const [candidatePhone, setCandidatePhone] = useState(profile.phone || '');
@@ -43,9 +52,12 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
   const [selectedFile, setSelectedFile] = useState(
     profile.cvFileName || profile.customFiles?.[0]?.name || 'Mon_CV.pdf'
   );
+  const [formAnswers, setFormAnswers] = useState<RecruiterFormAnswer[]>([]);
 
   const [copiedLetter, setCopiedLetter] = useState(false);
   const [copiedPitch, setCopiedPitch] = useState(false);
+  const [copiedAnswerKey, setCopiedAnswerKey] = useState<string | null>(null);
+  const [allAnswersCopied, setAllAnswersCopied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -57,6 +69,9 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       setCandidateEmail(profile.email || '');
       setCandidatePhone(profile.phone || '');
       setSelectedFile(profile.cvFileName || profile.customFiles?.[0]?.name || 'Mon_CV.pdf');
+      
+      const answers = generateRecruiterFormAnswers(profile, job);
+      setFormAnswers(answers);
       setIsSaved(false);
     }
   }, [job, profile]);
@@ -71,6 +86,29 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
     navigator.clipboard.writeText(pitch);
     setCopiedPitch(true);
     setTimeout(() => setCopiedPitch(false), 2000);
+  };
+
+  const handleCopyAnswer = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedAnswerKey(key);
+    setTimeout(() => setCopiedAnswerKey(null), 2000);
+  };
+
+  const handleCopyAllAnswers = () => {
+    const fullText = formAnswers
+      .map((item, idx) => `Q${idx + 1} : ${item.label}\nRéponse :\n${item.answer}`)
+      .join('\n\n---\n\n');
+    navigator.clipboard.writeText(fullText);
+    setAllAnswersCopied(true);
+    setTimeout(() => setAllAnswersCopied(false), 2000);
+  };
+
+  const handleUpdateAnswer = (index: number, val: string) => {
+    setFormAnswers((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], answer: val };
+      return copy;
+    });
   };
 
   const handleDownloadLetter = () => {
@@ -99,6 +137,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       coverLetter,
       pitch,
       attachedFiles: [selectedFile],
+      formAnswers,
       status: 'draft',
       dateCreated: new Date().toLocaleDateString('fr-FR'),
     };
@@ -123,6 +162,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       coverLetter,
       pitch,
       attachedFiles: [selectedFile],
+      formAnswers,
       status: 'submitted',
       dateCreated: new Date().toLocaleDateString('fr-FR'),
     };
@@ -240,67 +280,166 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
             )}
           </div>
 
-          {/* Lettre de motivation sur-mesure */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-200 flex items-center gap-2">
-                <span>Lettre de motivation générée sur-mesure</span>
-                <span className="text-[11px] font-normal text-emerald-400">
-                  (Entreprise et compétences adaptées automatiquement)
-                </span>
-              </label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleDownloadLetter}
-                  className="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Télécharger</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyLetter}
-                  className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5"
-                >
-                  {copiedLetter ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedLetter ? 'Copié !' : 'Copier'}</span>
-                </button>
-              </div>
-            </div>
-            <textarea
-              rows={9}
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-              className="w-full p-3.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 leading-relaxed font-sans shadow-inner"
-            />
-          </div>
-
-          {/* Pitch Court d'accompagnement */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-200 flex items-center gap-2">
-                <span>Pitch d'accroche court</span>
-                <span className="text-[11px] font-normal text-slate-400">
-                  (Idéal pour champ message recruteur ou message LinkedIn)
-                </span>
-              </label>
+          {/* Onglets de l'assistant de candidature */}
+          <div className="flex items-center justify-between border-b border-[#242c3d] pb-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handleCopyPitch}
-                className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5"
+                onClick={() => setModalTab('letter')}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-2 cursor-pointer ${
+                  modalTab === 'letter'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                }`}
               >
-                {copiedPitch ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedPitch ? 'Copié !' : 'Copier le pitch'}</span>
+                <FileText className="w-3.5 h-3.5" />
+                <span>Lettre de motivation & Pitch</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setModalTab('questions')}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition flex items-center gap-2 cursor-pointer ${
+                  modalTab === 'questions'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                }`}
+              >
+                <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Réponses au formulaire ({formAnswers.length} Q&R)</span>
               </button>
             </div>
-            <textarea
-              rows={3}
-              value={pitch}
-              onChange={(e) => setPitch(e.target.value)}
-              className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 leading-relaxed font-sans shadow-inner"
-            />
+
+            {modalTab === 'questions' && (
+              <button
+                type="button"
+                onClick={handleCopyAllAnswers}
+                className="px-2.5 py-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+              >
+                {allAnswersCopied ? <Check className="w-3.5 h-3.5" /> : <ClipboardList className="w-3.5 h-3.5" />}
+                <span>{allAnswersCopied ? 'Tout copié !' : 'Tout copier (Q&R)'}</span>
+              </button>
+            )}
           </div>
+
+          {/* Onglet 1 : Lettre de motivation & Pitch */}
+          {modalTab === 'letter' && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              {/* Lettre de motivation sur-mesure */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                    <span>Lettre de motivation personnalisée</span>
+                    <span className="text-[11px] font-normal text-emerald-400">
+                      (Entreprise "{job.company}" et compétences injectées)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDownloadLetter}
+                      className="px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Télécharger</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyLetter}
+                      className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      {copiedLetter ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedLetter ? 'Copié !' : 'Copier'}</span>
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  rows={9}
+                  value={coverLetter}
+                  onChange={(e) => setCoverLetter(e.target.value)}
+                  className="w-full p-3.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 leading-relaxed font-sans shadow-inner"
+                />
+              </div>
+
+              {/* Pitch Court d'accompagnement */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                    <span>Pitch d'accroche court</span>
+                    <span className="text-[11px] font-normal text-slate-400">
+                      (Pour champ message recruteur ou message LinkedIn)
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleCopyPitch}
+                    className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {copiedPitch ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedPitch ? 'Copié !' : 'Copier le pitch'}</span>
+                  </button>
+                </div>
+                <textarea
+                  rows={3}
+                  value={pitch}
+                  onChange={(e) => setPitch(e.target.value)}
+                  className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 leading-relaxed font-sans shadow-inner"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Onglet 2 : Questionnaire & Réponses aux formulaires recruteurs */}
+          {modalTab === 'questions' && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-xl text-xs text-emerald-300 flex items-center justify-between">
+                <span>
+                  💡 Copiez chaque réponse en 1 clic pour la coller directement dans le formulaire de candidature de l'employeur.
+                </span>
+                <span className="text-[11px] text-slate-400">Modifiable en direct</span>
+              </div>
+
+              <div className="space-y-3.5">
+                {formAnswers.map((item, index) => {
+                  const isCopied = copiedAnswerKey === item.questionKey;
+
+                  return (
+                    <div
+                      key={item.questionKey}
+                      className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-[10px] shrink-0 border border-blue-500/20">
+                            {index + 1}
+                          </span>
+                          <span className="text-xs font-semibold text-white">
+                            {item.label}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyAnswer(item.answer, item.questionKey)}
+                          className="px-2.5 py-1 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                        >
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{isCopied ? 'Copié !' : 'Copier'}</span>
+                        </button>
+                      </div>
+
+                      <textarea
+                        rows={item.answer.includes('\n') || item.answer.length > 100 ? 3 : 2}
+                        value={item.answer}
+                        onChange={(e) => handleUpdateAnswer(index, e.target.value)}
+                        className="w-full p-2.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 font-sans leading-relaxed shadow-inner"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Pied de modal avec validation finale par l'utilisateur */}

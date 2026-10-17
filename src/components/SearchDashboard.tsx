@@ -29,6 +29,7 @@ import {
   Calendar,
   Clock,
   Download,
+  CheckSquare,
 } from 'lucide-react';
 
 const CONTRACT_TYPES: { id: ContractType; label: string }[] = [
@@ -970,6 +971,55 @@ export const SearchDashboard: React.FC = () => {
                         </div>
                         <div className="p-2.5 bg-slate-950/70 border border-slate-800/70 rounded-lg text-xs text-slate-300 italic">
                           "{app.pitch}"
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Réponses au questionnaire du formulaire recruteur */}
+                    {app.formAnswers && app.formAnswers.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                            <CheckSquare className="w-3.5 h-3.5" />
+                            <span>Réponses aux questions du formulaire ({app.formAnswers.length})</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const fullText = (app.formAnswers || [])
+                                .map((item, idx) => `Q${idx + 1} : ${item.label}\nRéponse :\n${item.answer}`)
+                                .join('\n\n---\n\n');
+                              handleCopy(fullText, `answers-${app.id}`);
+                            }}
+                            className="px-2.5 py-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-md transition flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {copiedField === `answers-${app.id}` ? (
+                              <Check className="w-3.5 h-3.5" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                            <span>{copiedField === `answers-${app.id}` ? 'Tout copié !' : 'Tout copier (Q&R)'}</span>
+                          </button>
+                        </div>
+
+                        <div className="space-y-2 max-h-48 overflow-y-auto p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80">
+                          {app.formAnswers.map((fa, idx) => (
+                            <div key={idx} className="text-xs space-y-1 pb-2 border-b border-slate-800/60 last:border-b-0 last:pb-0">
+                              <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                                <span>{fa.label}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(fa.answer, `fa-${app.id}-${idx}`)}
+                                  className="text-blue-400 hover:text-blue-300 ml-2 shrink-0 cursor-pointer"
+                                >
+                                  {copiedField === `fa-${app.id}-${idx}` ? '✓ Copié' : 'Copier'}
+                                </button>
+                              </div>
+                              <p className="text-slate-200 text-xs font-sans pl-1 whitespace-pre-line">
+                                {fa.answer}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

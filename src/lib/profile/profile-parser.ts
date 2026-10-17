@@ -47,6 +47,20 @@ export const DEFAULT_PROFILE: UserProfile = {
   cvFileName: 'CV_Alexandre_Dupont_Communication.pdf',
   defaultCoverLetter: `Madame, Monsieur,\n\nVivement intéressé(e) par votre opportunité de {poste} au sein de {entreprise}, je vous adresse ma candidature avec un réel enthousiasme.\n\nFort(e) de mes compétences en {competences_cles}, j'ai développé une solide expertise dans le déploiement de stratégies de communication percutantes et la valorisation de marque. La vision et les ambitions de {entreprise} à {ville} correspondent parfaitement à mon projet professionnel.\n\nRigoureux(se), autonome et force de proposition, je serais ravi(e) de vous exposer mes motivations lors d'un prochain échange.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\n{nom}`,
   defaultPitch: `Bonjour, je vous soumets ma candidature pour le poste de {poste} chez {entreprise}. Maîtrisant {competences_cles}, je suis disponible pour échanger sur vos objectifs et vous apporter mon savoir-faire à {ville}. Au plaisir d'un échange ! {nom} • {telephone}`,
+  
+  // Champs questionnaires formulaires recruteurs
+  schoolName: 'Université d\'Aix-Marseille',
+  degreeTitle: 'Master Information, Communication & Médias Numériques',
+  availability: 'Disponible immédiatement',
+  onSiteCompatibility: 'Oui, mes conditions personnelles sont 100% compatibles avec une présence sur site.',
+  alternanceRhythm: '0 (Non concerné) — Candidature pour un contrat à temps plein classique, sans alternance.',
+  hasSocialMediaExperience: true,
+  socialMediaDetails: 'Oui. Création régulière de contenus éditoriaux, visuels et vidéos (Reels, TikTok, LinkedIn, Instagram, Facebook). Conception sur Canva / Photoshop / Illustrator et montage Premiere Pro / CapCut.',
+  portfolioUrl: 'https://mon-portfolio-communication.fr',
+  linkedinUrl: 'https://www.linkedin.com/in/alexandre-dupont',
+  githubOrProjectsUrl: 'https://drive.google.com/drive/folders/mes-realisations-com',
+  digitalCommMotivation: 'Ce qui me donne envie de participer à la communication digitale de {entreprise}, c\'est l\'opportunité de valoriser vos projets, vos expertises et vos engagements grâce à des formats de contenus dynamiques, créatifs et engageants pour vos communautés.',
+  
   customFiles: [
     {
       id: 'file-cv-1',

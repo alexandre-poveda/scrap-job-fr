@@ -18,6 +18,13 @@ import {
   FileCheck,
   FilePlus,
   HelpCircle,
+  GraduationCap,
+  Globe,
+  Share2,
+  Link2,
+  Calendar,
+  CheckSquare,
+  MessageSquare,
 } from 'lucide-react';
 
 interface ProfileTabProps {
@@ -34,6 +41,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isPasteOpen, setIsPasteOpen] = useState(false);
   const [pastedText, setPastedText] = useState('');
+
+  const insertTagInLetter = (tag: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      defaultCoverLetter: (prev.defaultCoverLetter || '') + tag + ' ',
+    }));
+  };
+
+  const insertTagInMotivation = (tag: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      digitalCommMotivation: (prev.digitalCommMotivation || '') + tag + ' ',
+    }));
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -426,38 +447,81 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
             <div className="flex items-center justify-between pb-3 border-b border-[#242c3d]">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-blue-400" />
-                <h3 className="text-sm font-bold text-white">Modèles de Candidature Automatique</h3>
+                <h3 className="text-sm font-bold text-white">Modèle de Lettre de Motivation & Pitch</h3>
               </div>
-              <span className="text-[11px] text-slate-400">Remplis automatiquement sur chaque offre</span>
+              <span className="text-[11px] text-slate-400">Ce que vous écrivez d'habitude</span>
             </div>
 
-            <div className="p-3 bg-blue-950/20 border border-blue-500/20 rounded-xl text-xs text-blue-300 space-y-1">
-              <p className="font-semibold flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5" />
-                <span>Variables dynamiques disponibles dans vos modèles :</span>
-              </p>
-              <p className="text-[11px] text-slate-400 font-mono">
-                {'{poste}'} • {'{entreprise}'} • {'{ville}'} • {'{competences_cles}'} • {'{nom}'} • {'{telephone}'}
-              </p>
+            <div className="p-3 bg-blue-950/20 border border-blue-500/20 rounded-xl text-xs text-blue-300 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold flex items-center gap-1.5">
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Insérer une variable dynamique dans votre texte :</span>
+                </span>
+                <span className="text-[10px] text-slate-400">Remplacées automatiquement à chaque offre</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => insertTagInLetter('{entreprise}')}
+                  className="px-2 py-1 text-[11px] font-mono bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-md transition cursor-pointer"
+                  title="Insère le nom de l'entreprise ciblée"
+                >
+                  + {'{entreprise}'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertTagInLetter('{poste}')}
+                  className="px-2 py-1 text-[11px] font-mono bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-md transition cursor-pointer"
+                  title="Insère l'intitulé exact du poste"
+                >
+                  + {'{poste}'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertTagInLetter('{ville}')}
+                  className="px-2 py-1 text-[11px] font-mono bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-md transition cursor-pointer"
+                  title="Insère la localisation de l'offre"
+                >
+                  + {'{ville}'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertTagInLetter('{competences_cles}')}
+                  className="px-2 py-1 text-[11px] font-mono bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-md transition cursor-pointer"
+                  title="Insère vos compétences correspondantes à l'offre"
+                >
+                  + {'{competences_cles}'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertTagInLetter('{nom}')}
+                  className="px-2 py-1 text-[11px] font-mono bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 rounded-md transition cursor-pointer"
+                  title="Insère votre nom complet"
+                >
+                  + {'{nom}'}
+                </button>
+              </div>
             </div>
 
             {/* Lettre type */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-200">
-                Modèle de lettre de motivation (pré-remplie et adaptée à chaque offre)
+                Votre modèle habituel de lettre de motivation
               </label>
               <textarea
-                rows={7}
+                rows={8}
                 value={formData.defaultCoverLetter || ''}
                 onChange={(e) => setFormData({ ...formData, defaultCoverLetter: e.target.value })}
-                className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans leading-relaxed shadow-inner"
+                placeholder="Madame, Monsieur, Vivement intéressé(e) par le poste de {poste} au sein de {entreprise}..."
+                className="w-full p-3.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans leading-relaxed shadow-inner"
               />
             </div>
 
             {/* Pitch court */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-200">
-                Pitch d'accroche court (pour message direct RH ou formulaire rapide)
+                Pitch d'accroche court (message direct RH / champ court)
               </label>
               <textarea
                 rows={3}
@@ -465,6 +529,178 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                 onChange={(e) => setFormData({ ...formData, defaultPitch: e.target.value })}
                 className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans leading-relaxed shadow-inner"
               />
+            </div>
+          </div>
+
+          {/* Bloc 4 : Questionnaire & Réponses types pour les formulaires recruteurs */}
+          <div className="p-6 rounded-2xl bg-[#12161f] border border-[#242c3d] shadow-lg space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#242c3d]">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Réponses types aux questions des formulaires</h3>
+              </div>
+              <span className="text-[11px] text-emerald-400 font-medium">Pré-remplissage en 1 clic</span>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Ces informations alimentent l'assistant de candidature pour répondre automatiquement aux questions récurrentes des sites d'emploi (écoles, alternance, réseaux sociaux, portfolio, disponibilités).
+            </p>
+
+            <div className="space-y-4">
+              {/* Question 1 : Motivation Communication Digitale */}
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Qu'est-ce qui vous donne envie de participer à la communication digitale ?</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => insertTagInMotivation('{entreprise}')}
+                    className="px-2 py-0.5 text-[10px] font-mono bg-blue-500/20 text-blue-300 rounded border border-blue-500/30 hover:bg-blue-500/30 transition cursor-pointer"
+                  >
+                    + {'{entreprise}'}
+                  </button>
+                </div>
+                <textarea
+                  rows={3}
+                  value={formData.digitalCommMotivation || ''}
+                  onChange={(e) => setFormData({ ...formData, digitalCommMotivation: e.target.value })}
+                  placeholder="Ce qui me donne envie de participer à la communication digitale de {entreprise}..."
+                  className="w-full p-2.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              {/* Question 2 : Formation & École */}
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                  <span>École / Université & Intitulé exact de votre formation</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <span className="block text-[11px] text-slate-400 mb-1">Nom de l'école / université</span>
+                    <input
+                      type="text"
+                      value={formData.schoolName || ''}
+                      onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                      placeholder="Ex: Université d'Aix-Marseille, EFAP..."
+                      className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400 mb-1">Intitulé exact du diplôme / formation</span>
+                    <input
+                      type="text"
+                      value={formData.degreeTitle || ''}
+                      onChange={(e) => setFormData({ ...formData, degreeTitle: e.target.value })}
+                      placeholder="Ex: Master Information & Communication Digitale"
+                      className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Question 3 & 4 : Rythme d'alternance & Présentiel */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-200">
+                    Rythme d'alternance (si demandé par le formulaire)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.alternanceRhythm || ''}
+                    onChange={(e) => setFormData({ ...formData, alternanceRhythm: e.target.value })}
+                    placeholder="Ex: 0 (Non concerné - Candidature temps plein)"
+                    className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                  <span className="text-[10px] text-slate-500">Par défaut : 0 car vous postulez en contrat classique.</span>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-200">
+                    Compatibilité présence sur site / organisation
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.onSiteCompatibility || ''}
+                    onChange={(e) => setFormData({ ...formData, onSiteCompatibility: e.target.value })}
+                    placeholder="Ex: Oui, mes conditions sont 100% compatibles."
+                    className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                  <span className="text-[10px] text-slate-500">Réponse pour confirmer la compatibilité présentiel.</span>
+                </div>
+              </div>
+
+              {/* Question 5 : Création de contenus réseaux sociaux */}
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Avez-vous créé des contenus destinés aux réseaux sociaux ?</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={formData.socialMediaDetails || ''}
+                  onChange={(e) => setFormData({ ...formData, socialMediaDetails: e.target.value })}
+                  placeholder="Oui, création régulière de contenus visuels et vidéos (Reels, TikTok, LinkedIn, Instagram). Conception sur Canva / Adobe..."
+                  className="w-full p-2.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              {/* Question 6 : Portfolio & Liens de réalisations */}
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Liens vers vos réalisations (Portfolio, LinkedIn, Projets)</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div>
+                    <span className="block text-[11px] text-slate-400 mb-1">Portfolio / Site web</span>
+                    <input
+                      type="url"
+                      value={formData.portfolioUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+                      placeholder="https://mon-portfolio.fr"
+                      className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400 mb-1">Profil LinkedIn</span>
+                    <input
+                      type="url"
+                      value={formData.linkedinUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                      placeholder="https://linkedin.com/in/profil"
+                      className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <span className="block text-[11px] text-slate-400 mb-1">Lien Projets / Vidéos / Drive</span>
+                    <input
+                      type="url"
+                      value={formData.githubOrProjectsUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, githubOrProjectsUrl: e.target.value })}
+                      placeholder="https://drive.google.com/..."
+                      className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Question 7 : Disponibilités */}
+              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Vos disponibilités</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.availability || ''}
+                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+                  placeholder="Ex: Disponible immédiatement / Préavis de 1 mois"
+                  className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>

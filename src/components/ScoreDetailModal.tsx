@@ -74,13 +74,72 @@ export const ScoreDetailModal: React.FC<ScoreDetailModalProps> = ({ job, onClose
           </div>
         </div>
 
+        {/* Décomposition des 4 piliers Career-Ops */}
+        <div className="mt-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <Award className="w-4 h-4 text-blue-400" />
+              <span>Calcul du score Career-Ops (Pondération multi-critères)</span>
+            </span>
+            <span className="text-[11px] text-blue-400 font-semibold">Total : {score.toFixed(1)}/5</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-slate-300">1. Compétences (40%)</span>
+                <span className={`text-[11px] font-bold ${breakdown?.missingSkills.length === 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {breakdown?.matchedSkills.length || 0} validée(s) • {breakdown?.missingSkills.length || 0} manquante(s)
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                {breakdown?.missingSkills.length === 0 && (breakdown?.matchedSkills.length || 0) > 0
+                  ? '🎯 100% des compétences demandées sont maîtrisées (Bonus adéquation maximale).'
+                  : breakdown?.missingSkills && breakdown.missingSkills.length > 0
+                  ? `⚠️ Pénalité appliquée pour les ${breakdown.missingSkills.length} compétence(s) technique(s) requise(s) non trouvées dans votre CV.`
+                  : 'Évaluation générale sur le descriptif.'}
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-slate-300">2. Intitulé du poste (25%)</span>
+                <span className="text-[11px] text-blue-400 font-bold">Ciblage métier</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Alignement sémantique entre "{job.title}" et votre métier cible.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-slate-300">3. Géographie (20%)</span>
+                <span className="text-[11px] text-emerald-400 font-bold">{job.location}</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Adéquation avec vos départements prioritaires ou le télétravail.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-slate-300">4. Contrat (15%)</span>
+                <span className="text-[11px] text-indigo-400 font-bold">{job.contractType}</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Conformité avec vos types de contrats souhaités (CDI, CDD, etc.).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Analyse des compétences */}
         <div className="mt-6 space-y-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                Compétences alignées avec votre CV ({breakdown?.matchedSkills.length || 0})
+                Compétences validées avec votre CV ({breakdown?.matchedSkills.length || 0})
               </h4>
             </div>
             <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/20">
@@ -103,7 +162,7 @@ export const ScoreDetailModal: React.FC<ScoreDetailModalProps> = ({ job, onClose
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="w-4 h-4 text-amber-400" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                Compétences manquantes ou non mentionnées ({breakdown?.missingSkills.length || 0})
+                Compétences requises manquantes ({breakdown?.missingSkills.length || 0})
               </h4>
             </div>
             <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-amber-950/20 border border-amber-500/20">
@@ -117,7 +176,7 @@ export const ScoreDetailModal: React.FC<ScoreDetailModalProps> = ({ job, onClose
                   </span>
                 ))
               ) : (
-                <span className="text-xs text-slate-400 italic">Aucun manque identifié par rapport à l'offre</span>
+                <span className="text-xs text-emerald-400 italic font-medium">✓ 100% de match : aucun manque identifié</span>
               )}
             </div>
           </div>
@@ -127,7 +186,7 @@ export const ScoreDetailModal: React.FC<ScoreDetailModalProps> = ({ job, onClose
             <div className="flex items-center gap-2 mb-2">
               <Award className="w-4 h-4 text-blue-400" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-blue-400">
-                Synthèse & Justification
+                Points clés du score
               </h4>
             </div>
             <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">

@@ -62,6 +62,13 @@ export interface CandidateFile {
   content?: string;
 }
 
+export interface RecruiterFormAnswer {
+  questionKey: string;
+  label: string;
+  category: 'motivation' | 'education' | 'social_media' | 'portfolio' | 'availability' | 'organization';
+  answer: string;
+}
+
 export interface UserProfile {
   name: string;
   email?: string;
@@ -80,6 +87,19 @@ export interface UserProfile {
   defaultCoverLetter?: string;
   defaultPitch?: string;
   customFiles?: CandidateFile[];
+  
+  // Champs pour formulaires et questionnaires recruteurs
+  schoolName?: string;
+  degreeTitle?: string;
+  availability?: string;
+  onSiteCompatibility?: string;
+  alternanceRhythm?: string;
+  hasSocialMediaExperience?: boolean;
+  socialMediaDetails?: string;
+  portfolioUrl?: string;
+  linkedinUrl?: string;
+  githubOrProjectsUrl?: string;
+  digitalCommMotivation?: string;
 }
 
 export interface JobApplication {
@@ -97,6 +117,7 @@ export interface JobApplication {
   coverLetter: string;
   pitch: string;
   attachedFiles: string[];
+  formAnswers?: RecruiterFormAnswer[];
   status: 'draft' | 'ready' | 'submitted';
   dateCreated: string;
 }

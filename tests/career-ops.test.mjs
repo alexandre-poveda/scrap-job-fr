@@ -77,3 +77,53 @@ test('evaluateJobOffer scores high for matching skills and excludes blacklisted'
   assert.strictEqual(alternanceEval.isExcluded, true);
   assert.ok(alternanceEval.blacklistedFound.length > 0);
 });
+
+test('offers with 100% skill coverage rank higher than offers with critical missing skills', () => {
+  const commProfile = {
+    name: 'Candidat Com',
+    title: 'Chargé de communication',
+    summary: '',
+    skills: ['Communication digitale', 'Marketing digital', 'Réseaux sociaux'],
+    preferredLocations: ['Marseille (13)'],
+    preferredContracts: ['CDI'],
+    blacklistedKeywords: ['alternance', 'stage'],
+    minimumScoreThreshold: 3.0,
+  };
+
+  // Offre A : 2 compétences requises, 2 validées (0 manquante) -> 100% de match
+  const jobFullMatch = {
+    id: 'a',
+    title: 'Chargé de communication et marketing',
+    company: 'Entreprise A',
+    location: 'Marseille (13)',
+    contractType: 'CDI',
+    source: 'france_travail',
+    url: 'https://example.com/a',
+    description: 'Poste en communication digitale et marketing digital.',
+    extractedSkills: ['Communication digitale', 'Marketing digital'],
+  };
+
+  // Offre B : 3 compétences alignées mais 3 compétences techniques manquantes (TypeScript, PostgreSQL, etc.)
+  const jobMissingTechSkills = {
+    id: 'b',
+    title: 'Chargé de communication et systèmes informatiques',
+    company: 'Entreprise B',
+    location: 'Marseille (13)',
+    contractType: 'CDI',
+    source: 'indeed',
+    url: 'https://example.com/b',
+    description: 'Poste communication et SI.',
+    extractedSkills: ['Communication digitale', 'Marketing digital', 'Réseaux sociaux', 'TypeScript', 'PostgreSQL', 'Docker'],
+  };
+
+  const evalA = evaluateJobOffer(jobFullMatch, commProfile);
+  const evalB = evaluateJobOffer(jobMissingTechSkills, commProfile);
+
+  assert.ok(
+    evalA.score > evalB.score,
+    `Expected Job A (0 missing, score ${evalA.score}) to be higher than Job B (3 missing, score ${evalB.score})`
+  );
+  assert.strictEqual(evalA.missingSkills.length, 0);
+  assert.strictEqual(evalB.missingSkills.length, 3);
+});
+
