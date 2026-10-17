@@ -186,15 +186,24 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     validJobs = validJobs.filter((j) => params.contractTypes!.includes(j.contractType));
   }
 
+  const belowThresholdJobs = evaluatedAll
+    .filter((j) => (j.score || 0) < minScore && (!j.scoreBreakdown?.blacklistedFound || j.scoreBreakdown.blacklistedFound.length === 0))
+    .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  const excludedJobs = evaluatedAll
+    .filter((j) => j.scoreBreakdown?.blacklistedFound && j.scoreBreakdown.blacklistedFound.length > 0);
+
   validJobs.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   return {
     jobs: validJobs,
+    belowThresholdJobs,
+    excludedJobs,
     stats: {
       totalScanned: generatedOffers.length,
       retained: validJobs.length,
-      blacklistedExcluded: blacklistedCount,
-      belowThresholdExcluded: belowThresholdCount,
+      blacklistedExcluded: excludedJobs.length,
+      belowThresholdExcluded: belowThresholdJobs.length,
       sourcesQueried: sources.length,
     },
   };

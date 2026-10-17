@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeHelloWork(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'developpeur');
@@ -51,30 +51,5 @@ export async function scrapeHelloWork(params: SearchFilterParams): Promise<JobOf
   }
 
   // Fallback réaliste HelloWork
-  return [
-    createJobOffer({
-      id: `hw-${Date.now()}-1`,
-      title: `${params.query || 'Développeur Full-Stack'} (H/F)`,
-      company: 'Cabinet RH Régional / ESN',
-      location: params.location || 'Bordeaux (33)',
-      contractType: 'CDI',
-      source: 'hellowork',
-      url: 'https://www.hellowork.com',
-      description: `Nous recherchons pour notre client un ${params.query || 'Développeur Full-Stack'} afin de concevoir et faire évoluer des applications web à fort trafic. Environnement : React, Node.js, TypeScript, PostgreSQL et Git. Mutuelle avantageuse et prime d'intéressement.`,
-      salary: '45k€ - 50k€ / an',
-      datePosted: "Aujourd'hui",
-    }),
-    createJobOffer({
-      id: `hw-${Date.now()}-2`,
-      title: `Expert ${params.query || 'Développeur Logiciel'} Web`,
-      company: 'LogiSoft France',
-      location: params.location || 'Lille (59)',
-      contractType: 'CDD',
-      source: 'hellowork',
-      url: 'https://www.hellowork.com',
-      description: `Contrat de 12 mois renouvelable. Participation à des projets agiles d'envergure. Compétences souhaitées : Vue.js, Express, Docker et méthode Scrum.`,
-      salary: '40k€ / an',
-      datePosted: 'Il y a 3 jours',
-    }),
-  ];
+  return generateDomainFallbackOffers(params, 'hellowork', 'HelloWork', 'https://www.hellowork.com');
 }

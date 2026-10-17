@@ -52,10 +52,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
   const [isLinkedInModalOpen, setIsLinkedInModalOpen] = useState(false);
   const [linkedInTab, setLinkedInTab] = useState<'pdf' | 'text'>('pdf');
   const [linkedInUrlInput, setLinkedInUrlInput] = useState(profile.linkedinUrl || '');
+  const [linkedInSchoolInput, setLinkedInSchoolInput] = useState(profile.schoolName || '');
+  const [linkedInDegreeInput, setLinkedInDegreeInput] = useState(profile.degreeTitle || '');
   const [linkedInTextInput, setLinkedInTextInput] = useState('');
   const [isAnalyzingLinkedIn, setIsAnalyzingLinkedIn] = useState(false);
   const [linkedInPreview, setLinkedInPreview] = useState<Partial<UserProfile> | null>(null);
-  const [linkedInFeedback, setLinkedInFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [linkedInFeedback, setLinkedInFeedback] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   const insertTagInLetter = (tag: string) => {
     setFormData((prev) => ({
@@ -234,18 +236,42 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
 
   // Traitement de la synchronisation LinkedIn par texte ou URL
   const handleLinkedInTextAnalyze = () => {
-    if (!linkedInTextInput.trim() && !linkedInUrlInput.trim()) return;
+    if (!linkedInTextInput.trim() && !linkedInUrlInput.trim() && !linkedInSchoolInput.trim()) return;
 
     setIsAnalyzingLinkedIn(true);
     setLinkedInFeedback(null);
     setLinkedInPreview(null);
 
+    const cleanUrl = linkedInUrlInput.trim()
+      ? linkedInUrlInput.trim().startsWith('http')
+        ? linkedInUrlInput.trim()
+        : `https://${linkedInUrlInput.trim()}`
+      : '';
+
+    // Si l'utilisateur a saisi l'URL et/ou son école et diplôme directement
+    if (!linkedInTextInput.trim()) {
+      setLinkedInPreview({
+        linkedinUrl: cleanUrl || undefined,
+        name: formData.name,
+        title: formData.title,
+        schoolName: linkedInSchoolInput.trim() || formData.schoolName,
+        degreeTitle: linkedInDegreeInput.trim() || formData.degreeTitle,
+      });
+      setLinkedInFeedback({
+        type: 'success',
+        message: 'Lien LinkedIn et informations prises en compte ! Vérifiez ci-dessous puis validez l\'enregistrement sur votre profil.',
+      });
+      setIsAnalyzingLinkedIn(false);
+      return;
+    }
+
     try {
-      const combinedText = `${linkedInUrlInput}\n${linkedInTextInput}`;
+      const combinedText = `${cleanUrl}\n${linkedInTextInput}`;
       const parsed = parseProfileFromText(combinedText, 'linkedin');
-      if (linkedInUrlInput.trim() && !parsed.linkedinUrl) {
-        parsed.linkedinUrl = linkedInUrlInput.trim();
-      }
+      if (cleanUrl) parsed.linkedinUrl = cleanUrl;
+      if (!parsed.schoolName && linkedInSchoolInput.trim()) parsed.schoolName = linkedInSchoolInput.trim();
+      if (!parsed.degreeTitle && linkedInDegreeInput.trim()) parsed.degreeTitle = linkedInDegreeInput.trim();
+
       setLinkedInPreview(parsed);
       setLinkedInFeedback({
         type: 'success',
@@ -267,33 +293,36 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
 
     setFormData((prev) => {
       const updatedSkills = Array.from(new Set([...prev.skills, ...(linkedInPreview.skills || [])]));
-      const newFileMeta: CandidateFile = {
-        id: `file-linkedin-${Date.now()}`,
-        name: `Export_LinkedIn_${(linkedInPreview.name || 'Profil').replace(/\s+/g, '_')}.pdf`,
-        type: 'cv',
-        size: 'Profil LinkedIn',
-        dateAdded: new Date().toLocaleDateString('fr-FR'),
-      };
+      const newFiles = prev.customFiles ? [...prev.customFiles] : [];
+      if (linkedInTab === 'pdf') {
+        newFiles.unshift({
+          id: `file-linkedin-${Date.now()}`,
+          name: `Export_LinkedIn_${(linkedInPreview.name || 'Profil').replace(/\s+/g, '_')}.pdf`,
+          type: 'cv',
+          size: 'Profil LinkedIn',
+          dateAdded: new Date().toLocaleDateString('fr-FR'),
+        });
+      }
 
       return {
         ...prev,
         name: linkedInPreview.name || prev.name,
         title: linkedInPreview.title || prev.title,
-        schoolName: linkedInPreview.schoolName || prev.schoolName,
-        degreeTitle: linkedInPreview.degreeTitle || prev.degreeTitle,
+        schoolName: linkedInPreview.schoolName || linkedInSchoolInput.trim() || prev.schoolName,
+        degreeTitle: linkedInPreview.degreeTitle || linkedInDegreeInput.trim() || prev.degreeTitle,
         linkedinUrl: linkedInPreview.linkedinUrl || prev.linkedinUrl || linkedInUrlInput,
         email: linkedInPreview.email || prev.email,
         phone: linkedInPreview.phone || prev.phone,
         city: linkedInPreview.city || prev.city,
         summary: linkedInPreview.summary || prev.summary,
         skills: updatedSkills,
-        customFiles: prev.customFiles ? [newFileMeta, ...prev.customFiles] : [newFileMeta],
+        customFiles: newFiles,
       };
     });
 
     setIsLinkedInModalOpen(false);
     setUploadMessage(
-      `🎉 Profil LinkedIn synchronisé avec succès ! École : "${linkedInPreview.schoolName || 'Enregistrée'}", Diplôme : "${linkedInPreview.degreeTitle || 'Enregistré'}", ${linkedInPreview.skills?.length || 0} compétences ajoutées.`
+      `🎉 Profil LinkedIn synchronisé avec succès ! École : "${linkedInPreview.schoolName || linkedInSchoolInput.trim() || 'Enregistrée'}", Diplôme : "${linkedInPreview.degreeTitle || linkedInDegreeInput.trim() || 'Enregistré'}", Lien : "${linkedInPreview.linkedinUrl || linkedInUrlInput}".`
     );
     setLinkedInPreview(null);
   };
@@ -1197,31 +1226,74 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Note explicative sur l'accès direct LinkedIn */}
+                  <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-semibold block">Pourquoi l'URL seule ne peut pas être lue à distance sans connexion ?</span>
+                      <span className="text-[11px] text-slate-300 mt-0.5 block leading-relaxed">
+                        LinkedIn protège ses profils contre le scraping externe et bloque l'accès public (sécurité anti-robot code 999).
+                        Pour renseigner votre formation en quelques secondes, vous pouvez soit confirmer votre école et diplôme ci-dessous, soit glisser votre export officiel (onglet 1 : Profil &gt; Plus &gt; Enregistrer au format PDF).
+                      </span>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center gap-1.5">
                       <Link2 className="w-3.5 h-3.5 text-blue-400" />
                       <span>Lien de votre profil LinkedIn</span>
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       value={linkedInUrlInput}
                       onChange={(e) => setLinkedInUrlInput(e.target.value)}
-                      placeholder="https://www.linkedin.com/in/votre-nom"
+                      placeholder="Ex: www.linkedin.com/in/alexandre-poveda-905308264"
                       className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 font-mono"
                     />
                   </div>
 
+                  {/* Saisie directe et rapide de l'école et diplôme */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1 flex items-center gap-1">
+                        <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
+                        <span>École / Université</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={linkedInSchoolInput}
+                        onChange={(e) => setLinkedInSchoolInput(e.target.value)}
+                        placeholder="Ex: Université d'Aix-Marseille, EFAP..."
+                        className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1 flex items-center gap-1">
+                        <FileText className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Intitulé exact du diplôme</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={linkedInDegreeInput}
+                        onChange={(e) => setLinkedInDegreeInput(e.target.value)}
+                        placeholder="Ex: Master Information & Communication"
+                        className="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-slate-200 mb-1.5 flex items-center gap-1.5">
-                      <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Texte de vos sections Formation & Infos LinkedIn</span>
+                      <FilePlus className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Ou coller du texte de votre profil LinkedIn (optionnel)</span>
                     </label>
                     <textarea
-                      rows={5}
+                      rows={3}
                       value={linkedInTextInput}
                       onChange={(e) => setLinkedInTextInput(e.target.value)}
-                      placeholder="Copiez et collez ici le texte de votre profil LinkedIn (ex: nom de votre école, intitulé du diplôme, vos compétences ou votre résumé)..."
-                      className="w-full p-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans"
+                      placeholder="Copiez et collez ici le texte de vos sections LinkedIn (formation, compétences, résumé) pour extraction automatique..."
+                      className="w-full p-2.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500 font-sans"
                     />
                   </div>
 
@@ -1229,11 +1301,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSaveProfile }
                     <button
                       type="button"
                       onClick={handleLinkedInTextAnalyze}
-                      disabled={isAnalyzingLinkedIn || (!linkedInTextInput.trim() && !linkedInUrlInput.trim())}
-                      className="px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer"
+                      disabled={isAnalyzingLinkedIn || (!linkedInTextInput.trim() && !linkedInUrlInput.trim() && !linkedInSchoolInput.trim())}
+                      className="px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-md"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>{isAnalyzingLinkedIn ? 'Analyse en cours...' : '⚡ Analyser et détecter les informations'}</span>
+                      <span>{isAnalyzingLinkedIn ? 'Analyse en cours...' : '⚡ Synchroniser mon profil LinkedIn'}</span>
                     </button>
                   </div>
                 </div>

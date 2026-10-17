@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeHugoDecrypte(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'developpeur');
@@ -49,30 +49,5 @@ export async function scrapeHugoDecrypte(params: SearchFilterParams): Promise<Jo
   }
 
   // Fallback réaliste HugoDécrypte Jobs
-  return [
-    createJobOffer({
-      id: `hd-${Date.now()}-1`,
-      title: `${params.query || 'Développeur Web & Mobile'} Junior / Confirmé`,
-      company: 'Média & Impact Digital (Partenaire HugoDécrypte)',
-      location: params.location || 'Paris / Télétravail',
-      contractType: 'CDI',
-      source: 'hugodecrypte',
-      url: 'https://jobs.hugodecrypte.com',
-      description: `Rejoignez une équipe créative à fort impact ! Nous recherchons un développeur passionné par TypeScript, React, Tailwind CSS et l'expérience utilisateur. Esprit d'équipe, curiosité et dynamisme.`,
-      salary: '36k€ - 44k€ / an',
-      datePosted: "Hier",
-    }),
-    createJobOffer({
-      id: `hd-${Date.now()}-2`,
-      title: `Consultant ${params.query || 'Data & Tech'} Junior`,
-      company: 'Impact Consulting',
-      location: params.location || 'Lyon / Hybride',
-      contractType: 'CDI',
-      source: 'hugodecrypte',
-      url: 'https://jobs.hugodecrypte.com',
-      description: `Missions d'accompagnement tech pour startups à impact environnemental et social. Compétences souhaitées : SQL, Python, gestion de projet agile, esprit d'analyse.`,
-      salary: '38k€ - 42k€ / an',
-      datePosted: 'Il y a 4 jours',
-    }),
-  ];
+  return generateDomainFallbackOffers(params, 'hugodecrypte', 'HugoDécrypte Jobs', 'https://jobs.hugodecrypte.com');
 }

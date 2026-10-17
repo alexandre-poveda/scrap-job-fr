@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeEmploiTerritorial(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'informatique');
@@ -49,30 +49,5 @@ export async function scrapeEmploiTerritorial(params: SearchFilterParams): Promi
   }
 
   // Fallback réaliste Emploi Territorial
-  return [
-    createJobOffer({
-      id: `et-${Date.now()}-1`,
-      title: `${params.query || 'Chef de Projet Informatique'} & Numérique`,
-      company: 'Communauté d\'Agglomération / Conseil Départemental',
-      location: params.location || 'Montpellier (34)',
-      contractType: 'FonctionPublique',
-      source: 'emploi_territorial',
-      url: 'https://www.emploi-territorial.fr',
-      description: `Recrutement par voie statutaire ou contractuelle (CDD 3 ans / CDI de droit public). Pilotage des projets de transformation numérique des services publics locaux. Compétences en gestion de projet, architectures web, bases de données PostgreSQL et marchés publics.`,
-      salary: 'Grille statutaire ingénieur territorial + RIFSEEP (38k€ - 47k€)',
-      datePosted: "Aujourd'hui",
-    }),
-    createJobOffer({
-      id: `et-${Date.now()}-2`,
-      title: `Administrateur Systèmes & Applications ${params.query || 'Web'}`,
-      company: 'Mairie de Métropole Régionale',
-      location: params.location || 'Rennes (35)',
-      contractType: 'CDD',
-      source: 'emploi_territorial',
-      url: 'https://www.emploi-territorial.fr',
-      description: `Direction des Systèmes d'Information. Missions : déploiement d'applications citoyennes, maintenance des serveurs Linux/Docker, sécurité informatique et gestion des droits.`,
-      salary: '34k€ - 39k€ / an',
-      datePosted: 'Il y a 4 jours',
-    }),
-  ];
+  return generateDomainFallbackOffers(params, 'emploi_territorial', 'Emploi Territorial', 'https://www.emploi-territorial.fr');
 }

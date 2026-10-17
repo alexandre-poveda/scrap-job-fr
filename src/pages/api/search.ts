@@ -53,20 +53,29 @@ export const POST: APIRoute = async ({ request }) => {
       };
     });
 
-    // 3. Ne garder que les meilleures offres (non exclues et >= seuil)
+    // 3. Répartir les offres selon leur statut de scoring
     const validJobs = evaluatedAll
       .filter((j) => !j.scoreBreakdown?.isExcluded)
       .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    const belowThresholdJobs = evaluatedAll
+      .filter((j) => (j.score || 0) < userProfile.minimumScoreThreshold && (!j.scoreBreakdown?.blacklistedFound || j.scoreBreakdown.blacklistedFound.length === 0))
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    const excludedJobs = evaluatedAll
+      .filter((j) => j.scoreBreakdown?.blacklistedFound && j.scoreBreakdown.blacklistedFound.length > 0);
 
     return new Response(
       JSON.stringify({
         success: true,
         jobs: validJobs,
+        belowThresholdJobs,
+        excludedJobs,
         stats: {
           totalScanned: rawJobs.length,
           retained: validJobs.length,
-          blacklistedExcluded: blacklistedCount,
-          belowThresholdExcluded: belowThresholdCount,
+          blacklistedExcluded: excludedJobs.length,
+          belowThresholdExcluded: belowThresholdJobs.length,
           sourcesQueried: searchParams.sources?.length || 9,
         },
       }),

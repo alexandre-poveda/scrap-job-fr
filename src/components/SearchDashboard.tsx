@@ -131,6 +131,8 @@ export const SearchDashboard: React.FC = () => {
 
   // Résultats & États
   const [jobs, setJobs] = useState<JobOffer[]>([]);
+  const [belowThresholdJobs, setBelowThresholdJobs] = useState<JobOffer[]>([]);
+  const [showBelowThreshold, setShowBelowThreshold] = useState<boolean>(false);
   const [stats, setStats] = useState<{
     totalScanned: number;
     retained: number;
@@ -175,6 +177,7 @@ export const SearchDashboard: React.FC = () => {
         const json = await res.json();
         if (json.success && Array.isArray(json.jobs)) {
           setJobs(json.jobs);
+          setBelowThresholdJobs(json.belowThresholdJobs || []);
           setStats(json.stats || null);
           return;
         }
@@ -192,6 +195,7 @@ export const SearchDashboard: React.FC = () => {
         currentProfile
       );
       setJobs(localResult.jobs);
+      setBelowThresholdJobs(localResult.belowThresholdJobs || []);
       setStats(localResult.stats);
     } catch {
       // En cas de panne réseau ou erreur de parsing, secours local instantané
@@ -206,6 +210,7 @@ export const SearchDashboard: React.FC = () => {
         currentProfile
       );
       setJobs(localResult.jobs);
+      setBelowThresholdJobs(localResult.belowThresholdJobs || []);
       setStats(localResult.stats);
     } finally {
       setIsLoading(false);
@@ -766,6 +771,137 @@ export const SearchDashboard: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Section explicative & visibilité des offres sous le seuil */}
+        {belowThresholdJobs.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-[#242c3d] space-y-4">
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-[#242c3d] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+              <div>
+                <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  <span>{belowThresholdJobs.length} autre(s) offre(s) notée(s) sous votre seuil de {minScore}/5</span>
+                </h4>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Ces offres ont obtenu une note inférieure à votre critère minimal (manque de compétences demandées ou contrat différent).
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowBelowThreshold(!showBelowThreshold)}
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
+                >
+                  {showBelowThreshold ? 'Masquer ces offres' : `Afficher les ${belowThresholdJobs.length} offres sous le seuil`}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newMin = Math.max(1.0, minScore - 0.5);
+                    setMinScore(newMin);
+                    triggerSearch(profile, newMin);
+                  }}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-950/60 text-blue-300 border border-blue-500/30 hover:bg-blue-900/60 transition cursor-pointer"
+                  title="Abaisser le seuil minimal pour inclure ces offres"
+                >
+                  Abaisser seuil à {(minScore - 0.5).toFixed(1)}★
+                </button>
+              </div>
+            </div>
+
+            {showBelowThreshold && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                {belowThresholdJobs.map((job) => {
+                  const score = job.score || 2.5;
+                  const sourceInfo = JOB_SOURCES[job.source];
+
+                  return (
+                    <div
+                      key={job.id}
+                      className="p-5 rounded-2xl bg-[#12161f]/70 border border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between shadow"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-2.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className="px-2 py-0.5 text-[10px] font-semibold rounded"
+                              style={{ backgroundColor: `${sourceInfo?.color}20`, color: sourceInfo?.color || '#94a3b8' }}
+                            >
+                              {sourceInfo?.name || job.source}
+                            </span>
+                            <span className="px-2 py-0.5 text-[10px] bg-slate-800 text-slate-400 rounded">
+                              {job.contractType}
+                            </span>
+                            <span className="px-2 py-0.5 text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded font-medium">
+                              Note sous le seuil ({score.toFixed(1)}/5)
+                            </span>
+                          </div>
+
+                          <div className="px-2 py-0.5 rounded border border-amber-500/30 text-xs font-bold text-amber-400 bg-amber-500/10">
+                            ★ {score.toFixed(1)}
+                          </div>
+                        </div>
+
+                        <h4 className="text-sm font-bold text-slate-200 line-clamp-2">{job.title}</h4>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                            {job.company}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                            {job.location}
+                          </span>
+                        </div>
+
+                        {job.scoreBreakdown?.reasons && job.scoreBreakdown.reasons.length > 0 && (
+                          <div className="mt-2.5 p-2 bg-slate-950/60 rounded-lg border border-slate-800/80 text-[11px] text-slate-300 space-y-1">
+                            {job.scoreBreakdown.reasons.slice(0, 2).map((r, i) => (
+                              <p key={i} className="flex items-start gap-1.5">
+                                <span className="text-amber-400">›</span>
+                                <span>{r}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedJobForDetail(job)}
+                          className="text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer flex items-center gap-1"
+                        >
+                          <span>Détails du score</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setApplicationJob(job)}
+                            className="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
+                          >
+                            Pré-remplir quand même
+                          </button>
+                          <a
+                            href={job.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1.5 text-xs bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-800 transition"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
     )}

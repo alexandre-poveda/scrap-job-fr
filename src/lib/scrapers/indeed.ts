@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeIndeed(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'developpeur');
@@ -50,30 +50,5 @@ export async function scrapeIndeed(params: SearchFilterParams): Promise<JobOffer
   }
 
   // Fallback réaliste Indeed France
-  return [
-    createJobOffer({
-      id: `indeed-${Date.now()}-1`,
-      title: `Lead ${params.query || 'Développeur Full-Stack'} Senior`,
-      company: 'TechFlow Solutions France',
-      location: params.location || 'Paris (75) / Télétravail partiel',
-      contractType: 'CDI',
-      source: 'indeed',
-      url: 'https://fr.indeed.com',
-      description: `TechFlow recherche un Lead ${params.query || 'Développeur'} pour piloter nos équipes produit. Stack principale : TypeScript, React, Node.js, Docker, architecture micro-services et PostgreSQL. Salaire attractif selon profil.`,
-      salary: '52k€ - 65k€ / an',
-      datePosted: "Aujourd'hui",
-    }),
-    createJobOffer({
-      id: `indeed-${Date.now()}-2`,
-      title: `${params.query || 'Développeur Logiciel'} Applicatif`,
-      company: 'Innovatech Services',
-      location: params.location || 'Nantes (44)',
-      contractType: 'CDI',
-      source: 'indeed',
-      url: 'https://fr.indeed.com',
-      description: `Rejoignez notre équipe nantaise. Missions : conception et développement d'APIs sécurisées, intégration front-end réactive avec React et Tailwind CSS, tests automatisés CI/CD.`,
-      salary: '40k€ - 48k€ / an',
-      datePosted: 'Il y a 3 jours',
-    }),
-  ];
+  return generateDomainFallbackOffers(params, 'indeed', 'Indeed France', 'https://fr.indeed.com');
 }

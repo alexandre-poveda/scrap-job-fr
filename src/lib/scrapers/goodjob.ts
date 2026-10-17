@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'emploi');
@@ -49,30 +49,5 @@ export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffe
   }
 
   // Fallback réaliste GoodJob
-  return [
-    createJobOffer({
-      id: `gj-${Date.now()}-1`,
-      title: `Mission : ${params.query || 'Développeur Full-Stack'} (H/F)`,
-      company: 'GoodJob Intérim Digital',
-      location: params.location || 'Strasbourg (67)',
-      contractType: 'Interim',
-      source: 'goodjob',
-      url: 'https://www.goodjob.com',
-      description: `GoodJob recherche pour une entreprise en pleine croissance un profil ${params.query || 'Développeur Full-Stack'}. Missions : participation aux sprints, écriture de tests automatisés, stack React / Node.js / Docker. Mission de 4 mois renouvelable.`,
-      salary: '22€ - 26€ / heure',
-      datePosted: "Aujourd'hui",
-    }),
-    createJobOffer({
-      id: `gj-${Date.now()}-2`,
-      title: `${params.query || 'Consultant Technique'} Intégration`,
-      company: 'GoodJob Recrutement',
-      location: params.location || 'Rennes (35)',
-      contractType: 'CDI',
-      source: 'goodjob',
-      url: 'https://www.goodjob.com',
-      description: `Poste en CDI pour accompagner la mise en place d'outils digitaux chez nos clients. Connaissances TypeScript, SQL et gestion de projet fortement appréciées.`,
-      salary: '39k€ / an',
-      datePosted: 'Il y a 3 jours',
-    }),
-  ];
+  return generateDomainFallbackOffers(params, 'goodjob', 'GoodJob', 'https://www.goodjob.com');
 }

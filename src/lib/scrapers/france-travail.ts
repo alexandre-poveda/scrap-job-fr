@@ -4,7 +4,7 @@
 
 import * as cheerio from 'cheerio';
 import type { JobOffer, SearchFilterParams } from '../types.ts';
-import { createJobOffer, fetchWithTimeout, normalizeContractType } from './base.ts';
+import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeFranceTravail(params: SearchFilterParams): Promise<JobOffer[]> {
   const deptMatch = params.location?.match(/\b(\d{2})\b/);
@@ -55,31 +55,6 @@ export async function scrapeFranceTravail(params: SearchFilterParams): Promise<J
     console.warn('France Travail live scrape failed, using fallback feed:', err);
   }
 
-  // Fallback réaliste calibré sur la recherche de l'utilisateur
-  return [
-    createJobOffer({
-      id: `ft-${Date.now()}-1`,
-      title: `${params.query || 'Développeur Full-Stack'} (H/F)`,
-      company: 'Groupement Hospitalier Régional',
-      location: params.location || 'Paris (75)',
-      contractType: 'CDI',
-      source: 'france_travail',
-      url: 'https://candidat.francetravail.fr/offres/recherche',
-      description: `Poste de ${params.query || 'Développeur'} en CDI. Vous participerez à la refonte de nos applications métiers. Maîtrise de TypeScript, React, Node.js, SQL et méthodes agiles demandée. Travail en équipe, autonomie et rigueur.`,
-      salary: '38k€ - 46k€ / an',
-      datePosted: "Aujourd'hui",
-    }),
-    createJobOffer({
-      id: `ft-${Date.now()}-2`,
-      title: `Ingénieur d'études et développement ${params.query || 'Web'}`,
-      company: 'Direction Générale des Finances Publiques',
-      location: params.location || 'Lyon (69)',
-      contractType: 'CDD',
-      source: 'france_travail',
-      url: 'https://candidat.francetravail.fr/offres/recherche',
-      description: `Dans le cadre de projets stratégiques de dématérialisation, nous recrutons un profil orienté ${params.query || 'TypeScript et APIs'}. Expérience en Docker, PostgreSQL et Git exigée.`,
-      salary: '42k€ / an',
-      datePosted: 'Il y a 2 jours',
-    }),
-  ];
+  // Fallback réaliste calibré sur le métier et la recherche de l'utilisateur
+  return generateDomainFallbackOffers(params, 'france_travail', 'France Travail', 'https://candidat.francetravail.fr');
 }
