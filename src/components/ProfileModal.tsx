@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { UserProfile, ContractType } from '../lib/types.ts';
-import { DEFAULT_PROFILE } from '../lib/profile/profile-parser.ts';
-import { Upload, X, ShieldAlert, Sparkles, Check, FileText, User } from 'lucide-react';
+import { DEFAULT_PROFILE, parseProfileFromText } from '../lib/profile/profile-parser.ts';
+import { Upload, X, ShieldAlert, Sparkles, Check, FileText, User, ChevronDown, ChevronUp, FileCode } from 'lucide-react';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -27,6 +27,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     setFormData(profile);
   }, [profile]);
 
+  const [isPasteOpen, setIsPasteOpen] = useState(false);
+  const [pastedText, setPastedText] = useState('');
+
   if (!isOpen) return null;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,9 +37,27 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     if (!file) return;
 
     setIsUploading(true);
-    setUploadMessage('Analyse du CV en cours...');
+    setUploadMessage('Lecture et analyse du document...');
 
     try {
+      // Si fichier texte brut ou markdown
+      if (file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
+        const text = await file.text();
+        const parsed = parseProfileFromText(text);
+        setFormData((prev) => ({
+          ...prev,
+          name: parsed.name || prev.name,
+          title: parsed.title || prev.title,
+          skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
+          experienceYears: parsed.experienceYears || prev.experienceYears,
+          cvRawText: text,
+        }));
+        setUploadMessage(`✅ Fichier texte analysé ! ${parsed.skills?.length || 0} compétences extraites.`);
+        setIsUploading(false);
+        return;
+      }
+
+      // Si PDF ou autre format
       const data = new FormData();
       data.append('file', file);
       data.append('type', 'cv');
@@ -46,23 +67,60 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         body: data,
       });
 
-      const json = await res.json();
-      if (res.ok && json.success) {
-        const parsed = json.profile;
-        setFormData((prev) => ({
-          ...prev,
-          name: parsed.name || prev.name,
-          title: parsed.title || prev.title,
-          skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
-          experienceYears: parsed.experienceYears || prev.experienceYears,
-          cvRawText: parsed.cvRawText || prev.cvRawText,
-        }));
-        setUploadMessage(`✅ CV analysé avec succès ! ${parsed.skills?.length || 0} compétences extraites.`);
-      } else {
-        setUploadMessage(`❌ ${json.error || 'Erreur de lecture du CV'}`);
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const json = await res.json();
+        if (json.success && json.profile) {
+          const parsed = json.profile;
+          setFormData((prev) => ({
+            ...prev,
+            name: parsed.name || prev.name,
+            title: parsed.title || prev.title,
+            skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
+            experienceYears: parsed.experienceYears || prev.experienceYears,
+            cvRawText: parsed.cvRawText || prev.cvRawText,
+          }));
+          setUploadMessage(`✅ CV analysé avec succès ! ${parsed.skills?.length || 0} compétences extraites.`);
+          return;
+        }
       }
+
+      let errorMsg = '⚠️ Le document n\'a pas pu être lu automatiquement.';
+      try {
+        const errJson = await res.json();
+        if (errJson.error) errorMsg = `⚠️ ${errJson.error}`;
+      } catch {}
+
+      setUploadMessage(
+        `${errorMsg} Vous pouvez aussi copier-coller le texte de votre CV directement ci-dessous.`
+      );
+      setIsPasteOpen(true);
     } catch (err: any) {
-      setUploadMessage(`❌ Erreur réseau : ${err.message}`);
+      setUploadMessage(`❌ Erreur réseau : ${err.message}. Vous pouvez coller le texte de votre profil ci-dessous.`);
+      setIsPasteOpen(true);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleExtractFromPasted = () => {
+    if (!pastedText.trim()) return;
+    setIsUploading(true);
+    try {
+      const parsed = parseProfileFromText(pastedText);
+      setFormData((prev) => ({
+        ...prev,
+        name: parsed.name || prev.name,
+        title: parsed.title || prev.title,
+        skills: Array.from(new Set([...prev.skills, ...(parsed.skills || [])])),
+        experienceYears: parsed.experienceYears || prev.experienceYears,
+        cvRawText: pastedText,
+      }));
+      setUploadMessage(`✅ Texte analysé ! ${parsed.skills?.length || 0} compétences extraites.`);
+      setPastedText('');
+      setIsPasteOpen(false);
+    } catch (err: any) {
+      setUploadMessage(`❌ Erreur d'analyse : ${err.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -165,6 +223,44 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 {uploadMessage}
               </p>
             )}
+
+            {/* Toggle Saisie Manuelle / Copier-Coller */}
+            <div className="mt-3 pt-3 border-t border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setIsPasteOpen(!isPasteOpen)}
+                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1.5 transition"
+              >
+                {isPasteOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <span>{isPasteOpen ? 'Masquer la saisie directe' : 'Ou copier-coller directement le texte de votre CV / profil'}</span>
+              </button>
+
+              {isPasteOpen && (
+                <div className="mt-3 p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2.5 animate-in fade-in duration-150">
+                  <p className="text-[11px] text-slate-400">
+                    Collez le texte de votre CV, profil LinkedIn ou compétences ci-dessous. Le moteur Career-Ops va en extraire automatiquement les compétences, le poste et l'expérience :
+                  </p>
+                  <textarea
+                    value={pastedText}
+                    onChange={(e) => setPastedText(e.target.value)}
+                    placeholder="Collez ici le texte de votre CV (ex: Vos expériences, vos outils, compétences clés...)"
+                    rows={4}
+                    className="w-full p-2.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white font-mono focus:outline-none focus:border-blue-500 placeholder:text-slate-600"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleExtractFromPasted}
+                      disabled={!pastedText.trim() || isUploading}
+                      className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isUploading ? 'Extraction...' : 'Extraire les compétences'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Informations Candidat */}

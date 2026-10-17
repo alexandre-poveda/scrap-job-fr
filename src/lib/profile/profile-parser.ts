@@ -1,28 +1,30 @@
 /**
  * profile-parser.ts — Ingestion et analyse de CV / Profils (LinkedIn, France Travail, PDF, Texte)
+ * Utilise unpdf pour un support 100% universel (Node, Cloudflare Workers, Edge) sans dépendance Node fs.
  */
 
-import { extractSkills } from '../career-ops/skill-extract';
-import type { UserProfile } from '../types';
+import { extractSkills } from '../career-ops/skill-extract.ts';
+import type { UserProfile } from '../types.ts';
+import { extractText } from 'unpdf';
 
 export const DEFAULT_PROFILE: UserProfile = {
   name: 'Alexandre Dupont',
-  title: 'Développeur Full-Stack & Solutions',
-  summary: 'Développeur passionné par TypeScript, React, Astro et les architectures cloud modernes. Recherche activement un CDI ou CDD dans un environnement stimulant.',
+  title: 'Chargé de communication',
+  summary: 'Professionnel de la communication et du marketing digital. Recherche activement un CDI, CDD ou mission dans un environnement stimulant.',
   skills: [
-    'TypeScript',
-    'JavaScript',
-    'React',
-    'Node.js',
-    'Tailwind CSS',
-    'PostgreSQL',
-    'Docker',
-    'Git',
-    'Méthode Agile',
-    'API REST',
+    'Communication digitale',
+    'Stratégie de communication',
+    'Réseaux sociaux / Community Management',
+    'Relations presse & médias',
+    'Événementiel & Organisation',
+    'Canva',
+    'Suite Adobe Creative',
+    'Pack Office',
+    'Rédaction web & SEO',
+    'Gestion de projet',
   ],
-  experienceYears: 4,
-  preferredLocations: ['Paris', 'Île-de-France', 'Télétravail', 'Lyon', 'Nantes'],
+  experienceYears: 3,
+  preferredLocations: ['Bouches-du-Rhône (13)', 'PACA', 'Marseille (13)', 'Télétravail'],
   preferredContracts: ['CDI', 'CDD'],
   blacklistedKeywords: ['alternance', 'stage', 'benevolat', 'commercial porte a porte'],
   minimumScoreThreshold: 3.5,
@@ -45,7 +47,7 @@ export function parseProfileFromText(rawText: string, sourceHint: 'cv' | 'linked
       inferredName = lines[0];
     }
     // La 2ème ou 3ème ligne est souvent le titre du poste
-    for (let i = 1; i < Math.min(lines.length, 5); i++) {
+    for (let i = 1; i < Math.min(lines.length, 6); i++) {
       if (lines[i].length < 60 && !lines[i].includes('@') && !lines[i].includes('http')) {
         inferredTitle = lines[i];
         break;
@@ -70,16 +72,22 @@ export function parseProfileFromText(rawText: string, sourceHint: 'cv' | 'linked
 }
 
 /**
- * Parse un buffer PDF pour en extraire le texte brut.
+ * Parse un buffer PDF pour en extraire le texte brut via unpdf (Cloudflare & Edge compatible).
  */
-export async function parsePdfBuffer(buffer: Buffer): Promise<string> {
+export async function parsePdfBuffer(buffer: Uint8Array | ArrayBuffer): Promise<string> {
   try {
-    const pdfParseModule = await import('pdf-parse');
-    const pdfParse = pdfParseModule.default || pdfParseModule;
-    const data = await pdfParse(buffer);
-    return data.text || '';
-  } catch (err) {
-    console.error('Erreur lors du parsing PDF:', err);
+    const data = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    const result = await extractText(data, { mergePages: true });
+    const text = result?.text;
+    if (typeof text === 'string') {
+      return text;
+    }
+    if (Array.isArray(text)) {
+      return text.join('\n');
+    }
+    return String(text || '');
+  } catch (err: any) {
+    console.error('Erreur lors du parsing PDF unpdf:', err);
     throw new Error('Impossible de lire le fichier PDF. Assurez-vous qu\'il contient du texte sélectionnable.');
   }
 }
