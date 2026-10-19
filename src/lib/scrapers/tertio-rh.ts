@@ -8,7 +8,7 @@ import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomain
 
 export async function scrapeTertioRH(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'tertiaire');
-  const url = `https://www.tertio-rh.com/nos-offres?search=${query}`;
+  const url = `https://tercio-rh.com/offres-emploi/?keyword=${query}`;
 
   try {
     const res = await fetchWithTimeout(url);
@@ -17,15 +17,19 @@ export async function scrapeTertioRH(params: SearchFilterParams): Promise<JobOff
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
 
-      $('.offer-card, .job-item, article').each((_, el) => {
-        const title = $(el).find('h3, .title').text().trim();
-        const company = $(el).find('.client, .company').text().trim() || 'Client Tertio RH';
+      $('.offer-card, .job-item, article, [class*="offre"]').each((_, el) => {
+        const title = $(el).find('h3, .title, a[href*="offre-emploi"]').first().text().trim();
+        const company = $(el).find('.client, .company').text().trim() || 'Client Tercio RH';
         const loc = $(el).find('.location, .city').text().trim() || params.location || 'Paris';
         const contractRaw = $(el).find('.contract, .badge').text().trim() || 'CDI';
-        const link = $(el).find('a').attr('href') || '';
-        const desc = $(el).find('.desc, p').text().trim() || `Offre Tertio RH : ${title}.`;
+        const link = $(el).find('a[href*="offre-emploi"], a').first().attr('href') || '';
+        const desc = $(el).find('.desc, p').text().trim() || `Offre Tercio RH : ${title}.`;
 
         if (title) {
+          const fullLink = link
+            ? (link.startsWith('http') ? link : `https://tercio-rh.com${link.startsWith('/') ? '' : '/'}${link}`)
+            : `https://tercio-rh.com/offres-emploi/?keyword=${encodeURIComponent(title)}`;
+
           results.push(
             createJobOffer({
               id: `tertio-${Math.random().toString(36).substring(2, 9)}`,
@@ -34,7 +38,7 @@ export async function scrapeTertioRH(params: SearchFilterParams): Promise<JobOff
               location: loc,
               contractType: normalizeContractType(contractRaw),
               source: 'tertio_rh',
-              url: link.startsWith('http') ? link : `https://www.tertio-rh.com${link}`,
+              url: fullLink,
               description: desc,
               datePosted: 'Récemment',
             })
@@ -45,9 +49,9 @@ export async function scrapeTertioRH(params: SearchFilterParams): Promise<JobOff
       if (results.length > 0) return results.slice(0, 10);
     }
   } catch (err) {
-    console.warn('Tertio RH scrape fallback engaged:', err);
+    console.warn('Tercio RH scrape fallback engaged:', err);
   }
 
-  // Fallback réaliste Tertio RH
-  return generateDomainFallbackOffers(params, 'tertio_rh', 'Tertio RH', 'https://www.tertio-rh.com');
+  // Fallback réaliste Tercio RH
+  return generateDomainFallbackOffers(params, 'tertio_rh', 'Tercio RH', 'https://tercio-rh.com');
 }

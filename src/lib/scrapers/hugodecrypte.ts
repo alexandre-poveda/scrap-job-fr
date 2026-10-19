@@ -8,7 +8,7 @@ import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomain
 
 export async function scrapeHugoDecrypte(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'developpeur');
-  const url = `https://jobs.hugodecrypte.com/fr/job-offers?query=${query}`;
+  const url = `https://jobs.hugodecrypte.com/offres?query=${query}`;
 
   try {
     const res = await fetchWithTimeout(url);

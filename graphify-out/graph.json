@@ -56,6 +56,19 @@
       "source_location": "L6"
     },
     {
+      "id": "src_layouts_layout_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SearchDashboard.tsx",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "src/layouts/Layout.astro",
+      "source_location": "L4"
+    },
+    {
       "id": "src_lib_types_candidatefile",
       "label": "CandidateFile",
       "_callable": true,
@@ -212,19 +225,6 @@
       "source_location": "L10"
     },
     {
-      "id": "src_layouts_layout_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "index.astro",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "src/layouts/Layout.astro",
-      "source_location": "L4"
-    },
-    {
       "id": "src_components_applicationmodal_applicationmodal",
       "label": "ApplicationModal()",
       "_callable": true,
@@ -282,7 +282,7 @@
       "file_type": "code",
       "norm_label": "searchdashboard()",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L44"
+      "source_location": "L46"
     },
     {
       "id": "src_lib_career_ops_application_helper_generaterecruiterformanswers",
@@ -342,7 +342,7 @@
       "file_type": "code",
       "norm_label": "createjoboffer()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L128"
+      "source_location": "L143"
     },
     {
       "id": "src_lib_scrapers_base_fetchwithtimeout",
@@ -366,7 +366,7 @@
       "file_type": "code",
       "norm_label": "generatedomainfallbackoffers()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L164"
+      "source_location": "L179"
     },
     {
       "id": "src_lib_scrapers_base_normalizecontracttype",
@@ -750,7 +750,7 @@
       "file_type": "code",
       "norm_label": "isgenericportalhomepage()",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L117"
+      "source_location": "L132"
     },
     {
       "id": "src_lib_scrapers_local_search_executelocalsearch",
@@ -851,7 +851,18 @@
       "file_type": "code",
       "norm_label": "contract_types",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L37"
+      "source_location": "L39"
+    },
+    {
+      "id": "src_layouts_layout",
+      "label": "Layout.astro",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SearchDashboard.tsx",
+      "file_type": "code",
+      "norm_label": "layout.astro",
+      "source_file": "src/layouts/Layout.astro",
+      "source_location": "L1"
     },
     {
       "id": "src_lib_career_ops_application_helper",
@@ -929,6 +940,28 @@
       "norm_label": "types.ts",
       "source_file": "src/lib/types.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_pages_index",
+      "label": "index.astro",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SearchDashboard.tsx",
+      "file_type": "code",
+      "norm_label": "index.astro",
+      "source_file": "src/pages/index.astro",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_pages_index_prerender",
+      "label": "prerender",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SearchDashboard.tsx",
+      "file_type": "code",
+      "norm_label": "prerender",
+      "source_file": "src/pages/index.astro",
+      "source_location": "L2"
     },
     {
       "id": "ref_lucide_react",
@@ -2116,37 +2149,16 @@
       "source_location": "L1"
     },
     {
-      "id": "src_layouts_layout",
-      "label": "Layout.astro",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "index.astro",
-      "file_type": "code",
-      "norm_label": "layout.astro",
-      "source_file": "src/layouts/Layout.astro",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_pages_index",
-      "label": "index.astro",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "index.astro",
-      "file_type": "code",
-      "norm_label": "index.astro",
-      "source_file": "src/pages/index.astro",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_pages_index_prerender",
-      "label": "prerender",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "index.astro",
-      "file_type": "code",
-      "norm_label": "prerender",
-      "source_file": "src/pages/index.astro",
-      "source_location": "L2"
+      "id": "src_styles_global",
+      "label": "src_styles_global",
+      "_origin": "semantic",
+      "community": 0,
+      "community_name": "SearchDashboard.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "src_styles_global",
+      "source_file": "",
+      "type": "external"
     },
     {
       "id": "ref_node_assert",
@@ -2169,18 +2181,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_test",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "src_styles_global",
-      "label": "src_styles_global",
-      "_origin": "semantic",
-      "community": 9,
-      "community_name": "index.astro",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "src_styles_global",
       "source_file": "",
       "type": "external"
     }
@@ -2243,7 +2243,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1033",
+      "source_location": "L1159",
       "weight": 1.0
     },
     {
@@ -2255,7 +2255,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1335",
+      "source_location": "L1462",
       "weight": 1.0
     },
     {
@@ -2267,7 +2267,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1344",
+      "source_location": "L1471",
       "weight": 1.0
     },
     {
@@ -2279,7 +2279,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L1352",
+      "source_location": "L1479",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard_searchdashboard",
+      "target": "src_lib_career_ops_application_helper_generatetailoredcoverletter",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard_searchdashboard",
+      "target": "src_lib_career_ops_application_helper_generaterecruiterformanswers",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -2291,7 +2315,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L229",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -2303,7 +2327,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L280",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -2315,7 +2339,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L285",
+      "source_location": "L339",
       "weight": 1.0
     },
     {
@@ -2327,7 +2351,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -2339,7 +2363,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -2603,7 +2627,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L142",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -2615,7 +2639,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L143",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -2627,7 +2651,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L149",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -2639,7 +2663,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L156",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -2651,7 +2675,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L185",
+      "source_location": "L200",
       "weight": 1.0
     },
     {
@@ -2663,7 +2687,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L192",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -2675,7 +2699,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L195",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -2699,7 +2723,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/emploi-territorial.ts",
-      "source_location": "L30",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -2711,7 +2735,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/emploi-territorial.ts",
-      "source_location": "L35",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -2723,7 +2747,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/emploi-territorial.ts",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -2795,7 +2819,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/goodjob.ts",
-      "source_location": "L30",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -2807,7 +2831,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/goodjob.ts",
-      "source_location": "L35",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -2819,7 +2843,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/goodjob.ts",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -3023,7 +3047,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L178",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -3047,7 +3071,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -3059,7 +3083,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L84",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -3071,7 +3095,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/local-search.ts",
-      "source_location": "L87",
+      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -3143,7 +3167,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/tertio-rh.ts",
-      "source_location": "L30",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -3155,7 +3179,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/tertio-rh.ts",
-      "source_location": "L35",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -3167,7 +3191,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/lib/scrapers/tertio-rh.ts",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -3720,6 +3744,30 @@
       "context": "import",
       "source_file": "src/components/SearchDashboard.tsx",
       "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard",
+      "target": "src_lib_career_ops_application_helper_generaterecruiterformanswers",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard",
+      "target": "src_lib_career_ops_application_helper_generatetailoredcoverletter",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -5600,7 +5648,7 @@
     },
     {
       "source": "src_components_searchdashboard",
-      "target": "ref_lucide_react",
+      "target": "src_lib_career_ops_application_helper",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5608,6 +5656,18 @@
       "context": "import",
       "source_file": "src/components/SearchDashboard.tsx",
       "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_searchdashboard",
+      "target": "ref_lucide_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/SearchDashboard.tsx",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -7359,7 +7419,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L37",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -7370,7 +7430,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/SearchDashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -7722,7 +7782,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L117",
+      "source_location": "L132",
       "weight": 1.0
     },
     {
@@ -7733,7 +7793,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L128",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -7744,7 +7804,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/scrapers/base.ts",
-      "source_location": "L164",
+      "source_location": "L179",
       "weight": 1.0
     },
     {
@@ -8253,5 +8313,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "069236d7fc257b71a5862378564d7d3ebea88e32"
+  "built_at_commit": "b1bef3f6da892373017180cc2efb591ecd1cbfe1"
 }

@@ -70,12 +70,14 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
   sources.forEach((srcId, idx) => {
     const src = JOB_SOURCES[srcId];
     const loc = resolveLocationDisplay(location, idx);
+    const qSlug = (query || 'emploi').toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
+    const locSlug = (loc || '').toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 20);
 
     // Offre 1 : Top Match (CDI, 3-4 compétences alignées, même ville)
     const t1 = `${query} (H/F)`;
     generatedOffers.push(
       createJobOffer({
-        id: `${srcId}-${Date.now()}-${idx}-1`,
+        id: `job-${srcId}-${qSlug}-${locSlug}-1`,
         title: t1,
         company: `${src.name} Partenaire`,
         location: loc,
@@ -93,7 +95,7 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     const t2 = `${query} Confirmé(e) - Pôle Marque & Médias`;
     generatedOffers.push(
       createJobOffer({
-        id: `${srcId}-${Date.now()}-${idx}-2`,
+        id: `job-${srcId}-${qSlug}-${locSlug}-2`,
         title: t2,
         company: `Groupe Médias Régional ${loc.split(' ')[0]}`,
         location: loc,
@@ -110,7 +112,7 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
     const t3 = `Assistant / Chargé de mission ${query}`;
     generatedOffers.push(
       createJobOffer({
-        id: `${srcId}-${Date.now()}-${idx}-3`,
+        id: `job-${srcId}-${qSlug}-${locSlug}-3`,
         title: t3,
         company: `PME Innovante ${src.name}`,
         location: loc,
@@ -128,7 +130,7 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
       const t4 = `Chargé de communication et événementiel`;
       generatedOffers.push(
         createJobOffer({
-          id: `${srcId}-${Date.now()}-${idx}-4`,
+          id: `job-${srcId}-${qSlug}-saint-etienne-4`,
           title: t4,
           company: `Fédération Régionale Loire`,
           location: 'Saint-Étienne (42)',
@@ -146,7 +148,7 @@ export function executeLocalSearch(params: SearchFilterParams, profile: UserProf
       const t5 = `${query} en Stage conventionné / Alternance`;
       generatedOffers.push(
         createJobOffer({
-          id: `${srcId}-alt-${idx}`,
+          id: `job-${srcId}-${qSlug}-${locSlug}-alt-5`,
           title: t5,
           company: `Agence ${src.name}`,
           location: loc,

@@ -9,6 +9,7 @@ import { ProfileModal } from './ProfileModal';
 import { ScoreDetailModal } from './ScoreDetailModal';
 import { ApplicationModal } from './ApplicationModal';
 import { ProfileTab } from './ProfileTab';
+import { generateTailoredCoverLetter, generateRecruiterFormAnswers } from '../lib/career-ops/application-helper.ts';
 import {
   Search,
   MapPin,
@@ -32,6 +33,7 @@ import {
   Clock,
   Download,
   CheckSquare,
+  XCircle,
 } from 'lucide-react';
 
 const CONTRACT_TYPES: { id: ContractType; label: string }[] = [
@@ -146,19 +148,71 @@ export const SearchDashboard: React.FC = () => {
       (app) =>
         app.jobId === job.id ||
         (app.jobTitle.trim().toLowerCase() === job.title.trim().toLowerCase() &&
-         app.company.trim().toLowerCase() === job.company.trim().toLowerCase())
+          app.company.trim().toLowerCase() === job.company.trim().toLowerCase() &&
+          app.source === job.source)
     );
   };
 
   const handleSaveApplication = (newApp: JobApplication) => {
     setSavedApplications((prev) => {
-      const existing = prev.filter((a) => a.id !== newApp.id && a.jobId !== newApp.jobId);
+      const existing = prev.filter(
+        (a) =>
+          a.id !== newApp.id &&
+          a.jobId !== newApp.jobId &&
+          !(
+            a.jobTitle.trim().toLowerCase() === newApp.jobTitle.trim().toLowerCase() &&
+            a.company.trim().toLowerCase() === newApp.company.trim().toLowerCase() &&
+            a.source === newApp.source
+          )
+      );
       const updated = [newApp, ...existing];
       if (typeof window !== 'undefined') {
         localStorage.setItem('career_ops_applications', JSON.stringify(updated));
       }
       return updated;
     });
+  };
+
+  const handleUnapplyJob = (job: JobOffer) => {
+    setSavedApplications((prev) => {
+      const updated = prev.filter(
+        (a) =>
+          a.jobId !== job.id &&
+          !(
+            a.jobTitle.trim().toLowerCase() === job.title.trim().toLowerCase() &&
+            a.company.trim().toLowerCase() === job.company.trim().toLowerCase() &&
+            a.source === job.source
+          )
+      );
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('career_ops_applications', JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
+
+  const handleQuickApply = (job: JobOffer) => {
+    const generated = generateTailoredCoverLetter(profile, job);
+    const newApp: JobApplication = {
+      id: `app-${Date.now()}`,
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company,
+      jobLocation: job.location,
+      jobUrl: job.url,
+      contractType: job.contractType,
+      source: job.source,
+      candidateName: profile.name || 'Candidat',
+      candidateEmail: profile.email || '',
+      candidatePhone: profile.phone || '',
+      coverLetter: generated.letter,
+      pitch: generated.pitch,
+      attachedFiles: profile.cvFileName ? [profile.cvFileName] : [],
+      formAnswers: generateRecruiterFormAnswers(profile, job),
+      status: 'submitted',
+      dateCreated: new Date().toLocaleDateString('fr-FR'),
+    };
+    handleSaveApplication(newApp);
   };
 
   const handleDeleteApplication = (id: string) => {
@@ -720,14 +774,28 @@ export const SearchDashboard: React.FC = () => {
                 <div>
                   {/* Bannière Déjà Postulé */}
                   {isApplied && (
-                    <div className="mb-3 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-between text-xs font-bold shadow-sm">
+                    <div className="mb-3 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex flex-wrap items-center justify-between gap-2 text-xs font-bold shadow-sm">
                       <span className="flex items-center gap-1.5">
                         <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                         <span>✓ Vous avez déjà postulé à cette offre</span>
                       </span>
-                      <span className="text-[11px] font-medium text-emerald-400/90 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                        {appliedApp?.dateCreated ? `Postulé le ${appliedApp.dateCreated}` : 'Candidature envoyée'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-emerald-400/90 bg-emerald-950/70 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                          {appliedApp?.dateCreated ? `Postulé le ${appliedApp.dateCreated}` : 'Candidature envoyée'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnapplyJob(job);
+                          }}
+                          className="px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition cursor-pointer flex items-center gap-1"
+                          title="Décocher cette offre de vos candidatures si vous n'avez pas postulé"
+                        >
+                          <XCircle className="w-3 h-3 text-red-400" />
+                          <span>Décocher</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -819,24 +887,46 @@ export const SearchDashboard: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     {isApplied ? (
-                      <button
-                        type="button"
-                        onClick={() => setApplicationJob(job)}
-                        className="px-3.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer"
-                        title="Revoir ou modifier votre candidature enregistrée"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-100" />
-                        <span>✓ Déjà postulé (Revoir)</span>
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setApplicationJob(job)}
+                          className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer"
+                          title="Revoir ou modifier votre candidature enregistrée"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-100" />
+                          <span>✓ Postulé (Revoir)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUnapplyJob(job)}
+                          className="px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-300 rounded-lg border border-slate-700 hover:border-red-500/30 transition flex items-center gap-1 cursor-pointer"
+                          title="Décocher cette offre de vos candidatures"
+                        >
+                          <XCircle className="w-3.5 h-3.5 text-red-400" />
+                          <span>Décocher</span>
+                        </button>
+                      </>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => setApplicationJob(job)}
-                        className="px-3.5 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-blue-600/25 transition flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-                        <span>⚡ Pré-remplir</span>
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setApplicationJob(job)}
+                          className="px-3.5 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-sm hover:shadow-md shadow-blue-600/25 transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                          <span>⚡ Pré-remplir</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickApply(job)}
+                          className="px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 rounded-lg border border-slate-700 hover:border-emerald-500/30 transition flex items-center gap-1 cursor-pointer"
+                          title="Marquer directement comme postulé"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Postulé ?</span>
+                        </button>
+                      </>
                     )}
 
                     <a
@@ -919,7 +1009,21 @@ export const SearchDashboard: React.FC = () => {
                               <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                               <span>✓ Déjà postulé à cette offre</span>
                             </span>
-                            <span className="text-[10px] text-emerald-400/90">{appliedApp?.dateCreated}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-emerald-400/90">{appliedApp?.dateCreated}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnapplyJob(job);
+                                }}
+                                className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition cursor-pointer flex items-center gap-1"
+                                title="Décocher cette offre de vos candidatures"
+                              >
+                                <XCircle className="w-3 h-3 text-red-400" />
+                                <span>Décocher</span>
+                              </button>
+                            </div>
                           </div>
                         )}
 
@@ -988,22 +1092,44 @@ export const SearchDashboard: React.FC = () => {
 
                         <div className="flex items-center gap-2">
                           {isApplied ? (
-                            <button
-                              type="button"
-                              onClick={() => setApplicationJob(job)}
-                              className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition cursor-pointer flex items-center gap-1"
-                            >
-                              <CheckCircle className="w-3 h-3 text-emerald-100" />
-                              <span>Déjà postulé</span>
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setApplicationJob(job)}
+                                className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition cursor-pointer flex items-center gap-1"
+                              >
+                                <CheckCircle className="w-3 h-3 text-emerald-100" />
+                                <span>Postulé (Revoir)</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUnapplyJob(job)}
+                                className="px-2 py-1.5 text-xs font-medium bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-300 rounded-lg border border-slate-700 hover:border-red-500/30 transition flex items-center gap-1 cursor-pointer"
+                                title="Décocher cette offre de vos candidatures"
+                              >
+                                <XCircle className="w-3 h-3 text-red-400" />
+                                <span>Décocher</span>
+                              </button>
+                            </>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => setApplicationJob(job)}
-                              className="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
-                            >
-                              Pré-remplir quand même
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setApplicationJob(job)}
+                                className="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
+                              >
+                                Pré-remplir quand même
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleQuickApply(job)}
+                                className="px-2 py-1.5 text-xs font-medium bg-slate-800 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 rounded-lg border border-slate-700 transition flex items-center gap-1 cursor-pointer"
+                                title="Marquer comme postulé"
+                              >
+                                <Check className="w-3 h-3 text-emerald-400" />
+                                <span>Postulé ?</span>
+                              </button>
+                            </>
                           )}
                           <a
                             href={job.url}
@@ -1187,10 +1313,11 @@ export const SearchDashboard: React.FC = () => {
                             e.stopPropagation();
                             handleDeleteApplication(app.id);
                           }}
-                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
-                          title="Supprimer cette candidature"
+                          className="px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-red-300 bg-slate-800 hover:bg-red-500/20 rounded-lg border border-slate-700 hover:border-red-500/30 transition cursor-pointer flex items-center gap-1.5"
+                          title="Décocher / Supprimer cette candidature"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                          <span>Décocher</span>
                         </button>
 
                         <button

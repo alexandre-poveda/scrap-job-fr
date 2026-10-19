@@ -8,7 +8,7 @@ import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomain
 
 export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'emploi');
-  const url = `https://www.goodjob.com/recherche?q=${query}`;
+  const url = `https://goodjob-interim.fr/offres-d-emploi/?s=${query}`;
 
   try {
     const res = await fetchWithTimeout(url);
@@ -17,15 +17,19 @@ export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffe
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
 
-      $('.job-listing, .offer-card, .job-row').each((_, el) => {
-        const title = $(el).find('h3, .title, a.job-link').text().trim();
+      $('.job-listing, .offer-card, .job-row, article').each((_, el) => {
+        const title = $(el).find('h3, .title, a.job-link, a[href*="/offre/"]').first().text().trim();
         const company = $(el).find('.company').text().trim() || 'GoodJob Partenaire';
         const loc = $(el).find('.location').text().trim() || params.location || 'France';
         const contractRaw = $(el).find('.contract, .badge').text().trim() || 'Interim';
-        const link = $(el).find('a').attr('href') || '';
+        const link = $(el).find('a[href*="/offre/"], a').first().attr('href') || '';
         const desc = $(el).find('.snippet, p').text().trim() || `Offre GoodJob : ${title}.`;
 
         if (title) {
+          const fullLink = link
+            ? (link.startsWith('http') ? link : `https://goodjob-interim.fr${link.startsWith('/') ? '' : '/'}${link}`)
+            : `https://goodjob-interim.fr/offres-d-emploi/?s=${encodeURIComponent(title)}`;
+
           results.push(
             createJobOffer({
               id: `gj-${Math.random().toString(36).substring(2, 9)}`,
@@ -34,7 +38,7 @@ export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffe
               location: loc,
               contractType: normalizeContractType(contractRaw),
               source: 'goodjob',
-              url: link.startsWith('http') ? link : `https://www.goodjob.com${link}`,
+              url: fullLink,
               description: desc,
               datePosted: 'Cette semaine',
             })
@@ -49,5 +53,5 @@ export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffe
   }
 
   // Fallback réaliste GoodJob
-  return generateDomainFallbackOffers(params, 'goodjob', 'GoodJob', 'https://www.goodjob.com');
+  return generateDomainFallbackOffers(params, 'goodjob', 'GoodJob Intérim', 'https://goodjob-interim.fr');
 }

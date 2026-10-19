@@ -72,14 +72,29 @@ export function buildJobPortalUrl(
   title: string,
   location?: string
 ): string {
-  const encTitle = encodeURIComponent((title || 'emploi').trim());
-  const cleanLoc = (location || '').replace(/[()]/g, '').trim();
-  const encLoc = encodeURIComponent(cleanLoc);
+  // Nettoyer les mentions parasites du titre comme (H/F), (h/f), les tirets de spécialités superflus, etc.
+  const cleanTitle = (title || 'emploi')
+    .replace(/\s*\(h\/f\)/gi, '')
+    .replace(/\s*h\/f\b/gi, '')
+    .replace(/\s*-\s*Pôle.*$/i, '')
+    .replace(/\s*Confirmé\(e\)/gi, '')
+    .replace(/\s*\(e\)/gi, '')
+    .replace(/\s*en stage conventionné.*$/i, '')
+    .trim();
+
+  const encTitle = encodeURIComponent(cleanTitle);
+
+  // Nettoyer la localisation : extraire la ville principale ou le département
+  const rawLoc = location || '';
+  const cityMatch = rawLoc.match(/^([a-zA-ZÀ-ÿ\s-]+?)(?:\s*\(\d+\)|$)/);
+  const cleanCity = cityMatch ? cityMatch[1].trim() : rawLoc.replace(/[()]/g, '').trim();
+  const encLoc = encodeURIComponent(cleanCity);
+  const deptMatch = rawLoc.match(/\b(\d{2})\b/);
+  const dept = deptMatch ? deptMatch[1] : '';
 
   switch (sourceId) {
     case 'france_travail': {
-      const deptMatch = cleanLoc.match(/\b(\d{2})\b/);
-      const ftLoc = deptMatch ? encodeURIComponent(deptMatch[1]) : encLoc;
+      const ftLoc = dept ? encodeURIComponent(dept) : encLoc;
       return `https://candidat.francetravail.fr/offres/recherche?motsCles=${encTitle}&lieux=${ftLoc}`;
     }
     case 'indeed': {
@@ -89,22 +104,22 @@ export function buildJobPortalUrl(
       return `https://www.hellowork.com/fr-fr/emploi/recherche.html?k=${encTitle}&l=${encLoc}`;
     }
     case 'hugodecrypte': {
-      return `https://jobs.hugodecrypte.com/fr/job-offers?query=${encTitle}`;
+      return `https://jobs.hugodecrypte.com/offres?query=${encTitle}`;
     }
     case 'manpower': {
       return `https://www.manpower.fr/candidats/recherche-d-offres/offres.html?keyword=${encTitle}&location=${encLoc}`;
     }
     case 'tertio_rh': {
-      return `https://www.tertio-rh.com/nos-offres?search=${encTitle}`;
+      return `https://tercio-rh.com/offres-emploi/?keyword=${encTitle}`;
     }
     case 'goodjob': {
-      return `https://www.goodjob.com/recherche?q=${encTitle}`;
+      return `https://goodjob-interim.fr/offres-d-emploi/?s=${encTitle}`;
     }
     case 'lejobadequat': {
-      return `https://www.lejobadequat.com/nos-offres?mot-cle=${encTitle}`;
+      return `https://www.lejobadequat.com/emplois?keyword=${encTitle}`;
     }
     case 'emploi_territorial': {
-      return `https://www.emploi-territorial.fr/recherche-offres?motcle=${encTitle}`;
+      return `https://www.emploi-territorial.fr/emploi-mobilite/?adv-search=1&motscles=${encTitle}`;
     }
     default:
       return `https://www.google.com/search?q=${encTitle}+${encLoc}+emploi`;
@@ -169,8 +184,8 @@ export function generateDomainFallbackOffers(
 ): JobOffer[] {
   const query = params.query || 'Chargé de communication';
   const qNorm = query.toLowerCase();
+  const slug = (qNorm || 'emploi').replace(/[^a-z0-9]/g, '-').slice(0, 30);
   const loc = params.location || 'Marseille (13)';
-  const now = Date.now();
 
   const isComm = /com|market|media|redact|event|graphis|reseau|journalis|relation|crea/i.test(qNorm);
   const isTech = /dev|tech|logiciel|fullstack|data|cyber|systeme|cloud|ia\b|python|react/i.test(qNorm);
@@ -183,7 +198,7 @@ export function generateDomainFallbackOffers(
 
     return [
       createJobOffer({
-        id: `${sourceId}-${now}-1`,
+        id: `${sourceId}-${slug}-1`,
         title: t1,
         company: `${sourceName} Partenaire Entreprise`,
         location: loc,
@@ -195,7 +210,7 @@ export function generateDomainFallbackOffers(
         datePosted: formatPublicationDate(0),
       }),
       createJobOffer({
-        id: `${sourceId}-${now}-2`,
+        id: `${sourceId}-${slug}-2`,
         title: t2,
         company: `Groupe Médias Régional (${loc.split(' ')[0]})`,
         location: loc,
@@ -207,7 +222,7 @@ export function generateDomainFallbackOffers(
         datePosted: formatPublicationDate(2),
       }),
       createJobOffer({
-        id: `${sourceId}-${now}-3`,
+        id: `${sourceId}-${slug}-3`,
         title: t3,
         company: `Agence Événementielle ${sourceName}`,
         location: loc,
@@ -227,7 +242,7 @@ export function generateDomainFallbackOffers(
 
     return [
       createJobOffer({
-        id: `${sourceId}-${now}-1`,
+        id: `${sourceId}-${slug}-1`,
         title: t1,
         company: `${sourceName} Tech Labs`,
         location: loc,
@@ -239,7 +254,7 @@ export function generateDomainFallbackOffers(
         datePosted: formatPublicationDate(0),
       }),
       createJobOffer({
-        id: `${sourceId}-${now}-2`,
+        id: `${sourceId}-${slug}-2`,
         title: t2,
         company: `InnovTech ${sourceName}`,
         location: loc,
@@ -258,7 +273,7 @@ export function generateDomainFallbackOffers(
 
     return [
       createJobOffer({
-        id: `${sourceId}-${now}-1`,
+        id: `${sourceId}-${slug}-1`,
         title: t1,
         company: `${sourceName} Conseil RH`,
         location: loc,
@@ -278,7 +293,7 @@ export function generateDomainFallbackOffers(
 
   return [
     createJobOffer({
-      id: `${sourceId}-${now}-1`,
+      id: `${sourceId}-${slug}-1`,
       title: t1,
       company: `${sourceName} Partenaire Régional`,
       location: loc,
@@ -290,7 +305,7 @@ export function generateDomainFallbackOffers(
       datePosted: formatPublicationDate(0),
     }),
     createJobOffer({
-      id: `${sourceId}-${now}-2`,
+      id: `${sourceId}-${slug}-2`,
       title: t2,
       company: `Entreprise Leader ${loc.split(' ')[0]}`,
       location: loc,

@@ -8,7 +8,7 @@ import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomain
 
 export async function scrapeEmploiTerritorial(params: SearchFilterParams): Promise<JobOffer[]> {
   const query = encodeURIComponent(params.query || 'informatique');
-  const url = `https://www.emploi-territorial.fr/recherche-offres?motcle=${query}`;
+  const url = `https://www.emploi-territorial.fr/emploi-mobilite/?adv-search=1&motscles=${query}`;
 
   try {
     const res = await fetchWithTimeout(url);
@@ -17,15 +17,19 @@ export async function scrapeEmploiTerritorial(params: SearchFilterParams): Promi
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
 
-      $('.offre-row, .card-offre, tr.offre').each((_, el) => {
-        const title = $(el).find('h3, .intitule, a.titre-offre').text().trim();
+      $('.offre-row, .card-offre, tr.offre, [class*="offre"]').each((_, el) => {
+        const title = $(el).find('h3, .intitule, a.titre-offre, a[href*="/offre/"]').first().text().trim();
         const company = $(el).find('.collectivite, .organisme').text().trim() || 'Collectivité Territoriale';
         const loc = $(el).find('.lieu, .departement').text().trim() || params.location || 'France';
         const contractRaw = $(el).find('.grade, .statut, .type-recrutement').text().trim() || 'Fonction Publique';
-        const link = $(el).find('a').attr('href') || '';
+        const link = $(el).find('a[href*="/offre/"], a').first().attr('href') || '';
         const desc = $(el).find('.resume, p').text().trim() || `Avis de recrutement Fonction Publique Territoriale pour ${title}.`;
 
         if (title) {
+          const fullLink = link
+            ? (link.startsWith('http') ? link : `https://www.emploi-territorial.fr${link.startsWith('/') ? '' : '/'}${link}`)
+            : `https://www.emploi-territorial.fr/emploi-mobilite/?adv-search=1&motscles=${encodeURIComponent(title)}`;
+
           results.push(
             createJobOffer({
               id: `et-${Math.random().toString(36).substring(2, 9)}`,
@@ -34,7 +38,7 @@ export async function scrapeEmploiTerritorial(params: SearchFilterParams): Promi
               location: loc,
               contractType: normalizeContractType(contractRaw),
               source: 'emploi_territorial',
-              url: link.startsWith('http') ? link : `https://www.emploi-territorial.fr${link}`,
+              url: fullLink,
               description: desc,
               datePosted: 'Cette semaine',
             })

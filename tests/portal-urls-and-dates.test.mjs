@@ -40,7 +40,7 @@ test('buildJobPortalUrl handles specific job board query formats', () => {
   assert.ok(hwUrl.includes('hellowork.com/fr-fr/emploi/recherche.html?k='));
 
   const hdUrl = buildJobPortalUrl('hugodecrypte', 'Chargé de communication');
-  assert.ok(hdUrl.includes('jobs.hugodecrypte.com/fr/job-offers?query='));
+  assert.ok(hdUrl.includes('jobs.hugodecrypte.com/offres?query='));
 });
 
 test('formatPublicationDate generates human-readable French relative and calendar dates', () => {
