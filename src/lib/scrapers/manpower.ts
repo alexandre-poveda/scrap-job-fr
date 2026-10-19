@@ -49,6 +49,5 @@ export async function scrapeManpower(params: SearchFilterParams): Promise<JobOff
     console.warn('Manpower scrape fallback engaged:', err);
   }
 
-  // Fallback réaliste Manpower France
-  return generateDomainFallbackOffers(params, 'manpower', 'Manpower', 'https://www.manpower.fr');
+  return [];
 }

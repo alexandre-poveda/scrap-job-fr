@@ -48,6 +48,5 @@ export async function scrapeHugoDecrypte(params: SearchFilterParams): Promise<Jo
     console.warn('HugoDecrypte jobs live scrape fallback engaged:', err);
   }
 
-  // Fallback réaliste HugoDécrypte Jobs
-  return generateDomainFallbackOffers(params, 'hugodecrypte', 'HugoDécrypte Jobs', 'https://jobs.hugodecrypte.com');
+  return [];
 }

@@ -7,8 +7,8 @@ import type { JobOffer, SearchFilterParams } from '../types.ts';
 import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeLeJobAdequat(params: SearchFilterParams): Promise<JobOffer[]> {
-  const query = encodeURIComponent(params.query || 'emploi');
-  const url = `https://www.lejobadequat.com/nos-offres?mot-cle=${query}`;
+  const query = encodeURIComponent(params.query || 'communication');
+  const url = `https://www.lejobadequat.com/emplois?keyword=${query}`;
 
   try {
     const res = await fetchWithTimeout(url);
@@ -16,39 +16,58 @@ export async function scrapeLeJobAdequat(params: SearchFilterParams): Promise<Jo
       const html = await res.text();
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
+      const seenUrls = new Set<string>();
 
-      $('.offer, .offre-item, [class*="card-offre"], [class*="job-item"]').each((_, el) => {
-        const title = $(el).find('h2, h3, .title').text().trim();
-        const company = $(el).find('.company').text().trim() || 'Groupe Adéquat';
-        const loc = $(el).find('.location, .lieu').text().trim() || params.location || 'France';
-        const contractRaw = $(el).find('.type-contrat, .contrat').text().trim() || 'CDI';
-        const link = $(el).find('a').attr('href') || '';
-        const desc = $(el).find('.description, p').text().trim() || `Offre Adéquat : ${title}.`;
+      $('a[href*="/emplois/"]').each((_, a) => {
+        const href = $(a).attr('href');
+        if (!href || !/\/emplois\/\d+/.test(href)) return;
+
+        const fullUrl = href.startsWith('http') ? href : `https://www.lejobadequat.com${href}`;
+        if (seenUrls.has(fullUrl)) return;
+        seenUrls.add(fullUrl);
+
+        const text = $(a).text().replace(/\s+/g, ' ').trim();
+        const idMatch = href.match(/\/emplois\/(\d+)/);
+        const offerId = idMatch ? idMatch[1] : Math.random().toString(36).slice(2, 9);
+
+        // Analyse du texte type "Secteur Réf : Z99-339249 Intitulé H/F CDI Ville"
+        const refMatch = text.match(/Réf\s*:\s*[^\s]+\s+(.+?)\s+(CDI|CDD|Interim|Intérim|Stage|Alternance)\s+(.+)$/i);
+        let title = '';
+        let contractRaw = 'Interim';
+        let loc = params.location || 'France';
+
+        if (refMatch) {
+          title = refMatch[1].trim();
+          contractRaw = refMatch[2].trim();
+          loc = refMatch[3].trim();
+        } else {
+          const hTitle = $(a).find('h2, h3, .title').text().trim();
+          title = hTitle || text.split('Réf')[0].trim() || `${params.query || 'Poste'} (H/F)`;
+        }
 
         const isArticle = /actualite|blog|minute|fournisseur officiel|gagner des places|arena/i.test(title);
         if (title && !isArticle) {
           results.push(
             createJobOffer({
-              id: `adequat-${Math.random().toString(36).substring(2, 9)}`,
+              id: `adequat-${offerId}`,
               title,
-              company,
+              company: 'Groupe Adéquat',
               location: loc,
               contractType: normalizeContractType(`${contractRaw} ${title}`),
               source: 'lejobadequat',
-              url: link.startsWith('http') ? link : `https://www.lejobadequat.com${link}`,
-              description: desc,
-              datePosted: 'Récemment',
+              url: fullUrl,
+              description: text || `Offre Le Job Adéquat pour ${title} à ${loc}.`,
+              datePosted: 'Publiée récemment',
             })
           );
         }
       });
 
-      if (results.length > 0) return results.slice(0, 10);
+      if (results.length > 0) return results.slice(0, 15);
     }
   } catch (err) {
-    console.warn('Le Job Adequat scrape fallback engaged:', err);
+    console.warn('Le Job Adequat scrape error:', err);
   }
 
-  // Fallback réaliste Le Job Adéquat
-  return generateDomainFallbackOffers(params, 'lejobadequat', 'Le Job Adéquat', 'https://www.lejobadequat.com');
+  return [];
 }

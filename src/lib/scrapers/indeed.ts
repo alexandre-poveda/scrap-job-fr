@@ -49,6 +49,5 @@ export async function scrapeIndeed(params: SearchFilterParams): Promise<JobOffer
     console.warn('Indeed live scrape blocked or timed out, fallback engaged:', err);
   }
 
-  // Fallback réaliste Indeed France
-  return generateDomainFallbackOffers(params, 'indeed', 'Indeed France', 'https://fr.indeed.com');
+  return [];
 }

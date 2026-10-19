@@ -7,8 +7,8 @@ import type { JobOffer, SearchFilterParams } from '../types.ts';
 import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeHelloWork(params: SearchFilterParams): Promise<JobOffer[]> {
-  const query = encodeURIComponent(params.query || 'developpeur');
-  const location = encodeURIComponent(params.location || 'France');
+  const query = encodeURIComponent(params.query || 'Chargé de communication');
+  const location = encodeURIComponent(params.location?.replace(/[()]/g, '').trim() || 'Bouches-du-Rhone');
   const url = `https://www.hellowork.com/fr-fr/emploi/recherche.html?k=${query}&l=${location}`;
 
   try {
@@ -17,39 +17,67 @@ export async function scrapeHelloWork(params: SearchFilterParams): Promise<JobOf
       const html = await res.text();
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
+      const seenUrls = new Set<string>();
 
-      $('li[data-cy="search-results-item"], article.offer-item, [class*="offer-"]').each((_, el) => {
-        const title = $(el).find('h3, [data-cy="offer-title"], .offer-title').text().trim();
-        const company = $(el).find('[data-cy="company-name"], .company-name').text().trim() || 'Recruteur HelloWork';
-        const loc = $(el).find('[data-cy="offer-location"], .offer-location').text().trim() || params.location || 'France';
-        const contractRaw = $(el).find('[data-cy="contract-type"], .contract-tag').text().trim() || 'CDI';
-        const snippet = $(el).find('p.offer-description, [data-cy="offer-description"]').text().trim();
-        const link = $(el).find('a').attr('href') || '';
-        const id = $(el).attr('id') || Math.random().toString(36).substring(2, 9);
+      $('a[href*="/emplois/"]').each((_, a) => {
+        const href = $(a).attr('href');
+        if (!href || !/\/emplois\/\d+\.html/.test(href)) return;
+
+        const fullUrl = href.startsWith('http') ? href : `https://www.hellowork.com${href}`;
+        if (seenUrls.has(fullUrl)) return;
+        seenUrls.add(fullUrl);
+
+        const li = $(a).closest('li');
+
+        // Titre propre (sans le nom d'entreprise inclus dans le sous-élément)
+        const titleEl = $(a).find('p[class*="typo-l"], p[class*="typo-xl"], h3').first();
+        let title = titleEl.text().trim();
+        if (!title) {
+          const rawLines = $(a).text().trim().split('\n').map((s) => s.trim()).filter(Boolean);
+          title = rawLines[0] || params.query || 'Chargé de communication';
+        }
+        title = title.split('\n')[0].trim();
+
+        // Entreprise
+        const companyEl = $(a).find('p[class*="typo-s"], [data-cy="company-name"]').first();
+        let company = companyEl.text().trim();
+        if (!company) {
+          const rawLines = $(a).text().trim().split('\n').map((s) => s.trim()).filter(Boolean);
+          company = rawLines[1] || 'Recruteur HelloWork';
+        }
+
+        // Tags & Métadonnées
+        const tags = li.find('[class*="tag-secondary"]').map((_, el) => $(el).text().trim()).get();
+        const loc = tags.find((t) => /\d{2}|Marseille|Aix|Bouches|Paris|Lyon/i.test(t)) || params.location || 'Bouches-du-Rhône (13)';
+        const rawContract = tags.find((t) => /CDI|CDD|Intérim|Alternance|Stage|Freelance/i.test(t)) || 'CDI';
+        const salary = tags.find((t) => /€|k€/i.test(t)) || undefined;
+        const dateText = li.find('[class*="text-grey-500"]').text().trim() || 'Publiée récemment';
+
+        const offerId = href.match(/\/(\d+)\.html/)?.[1] || Math.random().toString(36).slice(2, 9);
 
         if (title) {
           results.push(
             createJobOffer({
-              id: `hw-${id}`,
+              id: `hw-${offerId}`,
               title,
               company,
               location: loc,
-              contractType: normalizeContractType(contractRaw),
+              contractType: normalizeContractType(`${rawContract} ${title}`),
               source: 'hellowork',
-              url: link.startsWith('http') ? link : `https://www.hellowork.com${link}`,
-              description: snippet || `Offre d'emploi ${title} sur HelloWork. Profil recherché : ${params.query}.`,
-              datePosted: 'Récemment',
+              url: fullUrl,
+              salary,
+              description: `Offre HelloWork : ${title} chez ${company} (${loc}). Contrat : ${rawContract}. ${tags.join(' • ')}`,
+              datePosted: dateText,
             })
           );
         }
       });
 
-      if (results.length > 0) return results.slice(0, 10);
+      if (results.length > 0) return results.slice(0, 15);
     }
   } catch (err) {
-    console.warn('HelloWork scrape fallback engaged:', err);
+    console.warn('HelloWork scrape error:', err);
   }
 
-  // Fallback réaliste HelloWork
-  return generateDomainFallbackOffers(params, 'hellowork', 'HelloWork', 'https://www.hellowork.com');
+  return [];
 }

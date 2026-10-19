@@ -7,8 +7,7 @@ import type { JobOffer, SearchFilterParams } from '../types.ts';
 import { createJobOffer, fetchWithTimeout, normalizeContractType, generateDomainFallbackOffers } from './base.ts';
 
 export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffer[]> {
-  const query = encodeURIComponent(params.query || 'emploi');
-  const url = `https://goodjob-interim.fr/offres-d-emploi/?s=${query}`;
+  const url = 'https://goodjob-interim.fr/offres-emploi/';
 
   try {
     const res = await fetchWithTimeout(url);
@@ -16,42 +15,46 @@ export async function scrapeGoodJob(params: SearchFilterParams): Promise<JobOffe
       const html = await res.text();
       const $ = cheerio.load(html);
       const results: JobOffer[] = [];
+      const seenUrls = new Set<string>();
 
-      $('.job-listing, .offer-card, .job-row, article').each((_, el) => {
-        const title = $(el).find('h3, .title, a.job-link, a[href*="/offre/"]').first().text().trim();
-        const company = $(el).find('.company').text().trim() || 'GoodJob Partenaire';
-        const loc = $(el).find('.location').text().trim() || params.location || 'France';
-        const contractRaw = $(el).find('.contract, .badge').text().trim() || 'Interim';
-        const link = $(el).find('a[href*="/offre/"], a').first().attr('href') || '';
-        const desc = $(el).find('.snippet, p').text().trim() || `Offre GoodJob : ${title}.`;
+      $('a[href*="goodjob-interim.fr/offres-emploi/"]').each((_, a) => {
+        const href = $(a).attr('href');
+        if (!href || href === 'https://goodjob-interim.fr/offres-emploi/' || href.endsWith('/offres-emploi/')) return;
+        if (seenUrls.has(href)) return;
+        seenUrls.add(href);
 
-        if (title) {
-          const fullLink = link
-            ? (link.startsWith('http') ? link : `https://goodjob-interim.fr${link.startsWith('/') ? '' : '/'}${link}`)
-            : `https://goodjob-interim.fr/offres-d-emploi/?s=${encodeURIComponent(title)}`;
+        const slug = href.replace('https://goodjob-interim.fr/offres-emploi/', '').replace(/\/$/, '');
+        const cleanTitle = slug
+          .replace(/-/g, ' ')
+          .replace(/\bh f\b/gi, '(H/F)')
+          .replace(/\bf h\b/gi, '(F/H)')
+          .replace(/\b(cdi|cdd|interim)\b/gi, (m) => m.toUpperCase())
+          .replace(/^\w/, (c) => c.toUpperCase());
 
-          results.push(
-            createJobOffer({
-              id: `gj-${Math.random().toString(36).substring(2, 9)}`,
-              title,
-              company,
-              location: loc,
-              contractType: normalizeContractType(contractRaw),
-              source: 'goodjob',
-              url: fullLink,
-              description: desc,
-              datePosted: 'Cette semaine',
-            })
-          );
-        }
+        const isCDI = /cdi/i.test(slug);
+        const isCDD = /cdd/i.test(slug);
+        const contract = isCDI ? 'CDI' : isCDD ? 'CDD' : 'Interim';
+
+        results.push(
+          createJobOffer({
+            id: `gj-${slug}`,
+            title: cleanTitle,
+            company: 'GoodJob Intérim',
+            location: params.location || 'Auvergne-Rhône-Alpes / France',
+            contractType: contract,
+            source: 'goodjob',
+            url: href,
+            description: `Offre GoodJob Intérim : ${cleanTitle}. Missions disponibles avec contact direct agence.`,
+            datePosted: 'Publiée récemment',
+          })
+        );
       });
 
-      if (results.length > 0) return results.slice(0, 10);
+      if (results.length > 0) return results.slice(0, 15);
     }
   } catch (err) {
-    console.warn('GoodJob scrape fallback engaged:', err);
+    console.warn('GoodJob scrape error:', err);
   }
 
-  // Fallback réaliste GoodJob
-  return generateDomainFallbackOffers(params, 'goodjob', 'GoodJob Intérim', 'https://goodjob-interim.fr');
+  return [];
 }
